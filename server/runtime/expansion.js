@@ -10,8 +10,10 @@
   Object.entries(LEGACY).forEach(([old,id])=>{if(DATA.moves[id])M[old]={...DATA.moves[id]};});
   M.struggle={n:'Luta desesperada',en:'Struggle',t:'normal',p:50,a:100,pp:1,cat:2};
   const originalIds=new Set(Object.keys(SP));
+  // Official names that capitalizing the id would get wrong.
+  const OFFICIAL_NAMES={'nidoran-f':'Nidoran♀','nidoran-m':'Nidoran♂','mr-mime':'Mr. Mime','mime-jr':'Mime Jr.'};
   Object.entries(DATA.species).forEach(([id,d])=>{
-    if(!SP[id])sp(id,id[0].toUpperCase()+id.slice(1),d.dex,d.types,[d.stats[0],d.stats[1],d.stats[2],d.stats[5]],.45,1,[]);
+    if(!SP[id])sp(id,OFFICIAL_NAMES[id]||id[0].toUpperCase()+id.slice(1),d.dex,d.types,[d.stats[0],d.stats[1],d.stats[2],d.stats[5]],.45,1,[]);
     const s=SP[id];s.stats=d.stats;s.learn=d.learn;s.evolution=d.evolutions;s.base=d.base;
     // Use the current PokeAPI typing consistently across the existing roster.
     s.t=d.types.slice();if(!s.t.length)s.t=['normal'];
@@ -206,12 +208,20 @@
   };
   function saveBattle(){SAVE_STORAGE.setItem(SAVE_KEY,JSON.stringify({R,S:{...S,screen:'hub',shop:false,sel:null},V,inBattle:true,training:!!B.train,trainingLiving:B.trainingLiving}));}
   const originalPersist=persist;
-  persist=()=>{if(R&&['summary','pc','dex','journal'].includes(S.screen)){SAVE_STORAGE.setItem(SAVE_KEY,JSON.stringify({R,S:{...S,screen:subReturn==='hub'?'hub':'title'},V}));return;}originalPersist();};
+  persist=()=>{if(R&&S.screen==='intro'&&B?.preview){SAVE_STORAGE.setItem(SAVE_KEY,JSON.stringify({R,S:{...S,screen:'hub',shop:false,sel:null},V}));return;}if(R&&['summary','pc','dex','journal'].includes(S.screen)){SAVE_STORAGE.setItem(SAVE_KEY,JSON.stringify({R,S:{...S,screen:subReturn==='hub'?'hub':'title'},V}));return;}originalPersist();};
   function enemyLevel(){const base=4+Math.floor((R.battle+1)*1.05),alive=R.team.filter(m=>m.hp>0),avg=alive.reduce((s,m)=>s+m.lvl,0)/Math.max(1,alive.length);return Math.min(100,Math.max(base,Math.floor(avg-3)));}
   function makeEnemy(id,L,alpha=false){const m=mk(id,L);m.alpha=alpha;if(alpha){m.maxHp=Math.floor(m.maxHp*1.2);m.hp=m.maxHp;m.atk=Math.floor(m.atk*1.08);m.spa=Math.floor(m.spa*1.08);}return m;}
+  let confirmingTrainer=false;
   startBattle=train=>{
     if(S.screen!=='hub'||EVOLVING||!R.team.some(m=>m.hp>0))return;
     if(R.battle>=70&&!R.endless){winRun();return;}
+    // The introduction is a preview. Encounter effects and quit penalties start on confirmation.
+    if(!train&&!S.exploring&&nextIsBoss()&&!confirmingTrainer){
+      const trainer=trainerNext(),L=enemyLevel();
+      const enemies=trainer.team.map((id,i)=>makeEnemy(id,Math.max(2,L+(i===trainer.team.length-1?1:-1))));
+      B={preview:true,boss:true,trainer,enemies,enemy:enemies[0],double:!!R.postgame,train:false,musicTrack:stageIndex()>=12?'champion':'bossKanto'};
+      S.screen='intro';S.shop=false;S.sel=null;persist();return;
+    }
     if(train){if(R.mode==='classic'){S.msg='No Clássico, prepare sua equipe nos encontros selvagens.';return;}if(!trainingLeft()){S.msg='Treinos esgotados nesta etapa.';return;}if(R.trainStage!==R.battle){R.trainStage=R.battle;R.trainUsed=0;}R.trainUsed++;}
     const exploration=!!S.exploring;delete S.exploring;const boss=!train&&!exploration&&nextIsBoss(),trainer=boss?trainerNext():null,L=enemyLevel(),double=!!R.postgame;
     const alpha=window.CollectionModel?CollectionModel.alphaDue(R,boss,train):false;
@@ -229,11 +239,19 @@
     if(journal&&!train)enemies.forEach(m=>journal.observe(R,m.sp));
     B.playerSlots.forEach(i=>B.used.push(R.team[i]));
     if(strategy){for(const i of B.playerSlots)strategy.enter(R.team[i],B.enemySlots.map(x=>B.enemies[x]));for(const i of B.enemySlots)strategy.enter(B.enemies[i],B.playerSlots.map(x=>R.team[x]));}
-    saveBattle();S.screen=boss?'intro':'battle';S.shop=false;S.sel=null;
+    saveBattle();S.screen='battle';S.shop=false;S.sel=null;
     B.log.push(trainer?`${trainer.name} desafia você com ${enemies.length} Pokémon!`:`${enemies.some(m=>m.alpha)?'Encontro raro: Pokémon Alfa!':'Encontro selvagem!'}${double?' Batalha em dupla.':''}`);
-    musicStart(B.musicTrack);if(!boss){sfx('start');crySfx(B.enemy);}
+    musicStart(B.musicTrack);sfx('start');crySfx(B.enemy);
   };
-  ACT.beginTrainer=()=>{if(S.screen!=='intro'||!B)return;S.screen='battle';sfx('start');crySfx(B.enemy);};
+  ACT.beginTrainer=()=>{
+    if(S.screen!=='intro'||!B?.preview)return;
+    S.screen='hub';confirmingTrainer=true;
+    try{startBattle(false);}finally{confirmingTrainer=false;}
+  };
+  ACT.cancelTrainer=()=>{
+    if(S.screen!=='intro'||!B?.preview)return;
+    B=null;S.screen='hub';S.shop=false;S.sel=null;S.msg='';persist();
+  };
   const stageMultiplier=(m,key)=>{const v=Math.max(-6,Math.min(6,m.stages?.[key]||0));return v>=0?(2+v)/2:2/(2-v);};
   dmgCalc=(att,def,mv,pl)=>{
     const special=mv.cat===3,A=(special?att.spa:att.atk)*stageMultiplier(att,special?'spa':'atk'),D=(special?def.spd:def.def)*stageMultiplier(def,special?'spd':'def');
@@ -439,7 +457,7 @@
     const memorial=(META.championTeams||[]).map(t=>`<article class="journal-entry"><h3>Equipe campeã · ${esc(new Date(t.date).toLocaleDateString('pt-BR'))}</h3><p>${({ready:'Disponível para uma tentativa no pós-game',active:'Tentativa em andamento',lost:'Memorial · Permadeath encerrado',completed:'Pós-game concluído · memorial'})[t.state]||'Memorial'}</p><small>Clássico: reutilizável${t.playTimeMs==null?'':` · Tempo da Liga: ${window.JourneyClock?.format(t.playTimeMs)||''}`}</small><div class="journal-team">${(t.original||t.team).map(m=>`<div><img src="${SPRITE(SP[m.sp].dex)}" alt=""><span>${monName(m)} Nv. ${m.lvl}</span></div>`).join('')}</div>${btn('postgame','Usar no pós-game em dupla',t.id,'gold')}</article>`).join('');
     return `<section class="panel">${subHeader('PC')}<p>O PC normal pertence apenas à jornada. Pokémon guardados não evitam a derrota da equipe.</p>${msgBox()}${box}<h3>Caixa especial de campeões</h3><p>Somente para o pós-game. Ao iniciar, os sobreviventes voltam à forma inicial e ao nível 5. Permadeath: uma tentativa por equipe. Clássico: pode reutilizar a equipe. A Pokédex e o registro original não mudam.</p>${memorial||'<p>Vença Lance e Blue para guardar sua primeira equipe.</p>'}${META.champ?btn('openDouble','Escolher equipe para duplas'):''}</section>`;
   }
-  function rIntro(){const t=B.trainer;return `<section class="panel trainer-intro"><p>${stageIndex()<8?'Líder de ginásio':stageIndex()<12?'Elite Four':'Campeão'}</p><img src="assets/trainers/${t.sprite}.png" alt="${t.name}"><h2>${t.name}</h2><p>${t.type?`Especialidade: ${TYPES[t.type][0]}`:'Equipe de tipos variados'} · ${t.team.length} Pokémon</p><p>“Prepare sua equipe. Este desafio começa agora!”</p>${btn('beginTrainer','Começar batalha','','gold')}</section>`;}
+  function rIntro(){const t=B.trainer;return `<section class="panel trainer-intro"><p>${stageIndex()<8?'Líder de ginásio':stageIndex()<12?'Elite Four':'Campeão'}</p><img src="assets/trainers/${t.sprite}.png" alt="${t.name}"><h2>${t.name}</h2><p>${t.type?`Especialidade: ${TYPES[t.type][0]}`:'Equipe de tipos variados'} · ${t.team.length} Pokémon</p><p>Prepare sua equipe antes de começar.</p>${btn('beginTrainer','Começar batalha','','gold')}${btn('cancelTrainer','Voltar à jornada')}</section>`;}
   const originalTitle=rTitle;
   rTitle=()=>originalTitle().replace(/<button class="btn gba-option" data-act="journal" data-v="dex">[\s\S]*?<\/button>/,`<button class="btn gba-option" data-act="dex"><span>Pokédex</span><small>Pesquisar espécies</small></button>`).replace(/<button class="btn gba-option" data-act="journal" data-v="history">[\s\S]*?<\/button>/,`<button class="btn gba-option" data-act="journal" data-v="history"><span>Diário do Treinador</span><small>Histórico e conquistas</small></button>`).replace(/<button class="btn gba-option" data-act="journal" data-v="achievements">[\s\S]*?<\/button>/,`<button class="btn gba-option" data-act="pc"><span>${META.champ?'PC de campeões · Pós-game':'PC de campeões'}</span><small>Equipes da Liga e memoriais</small></button>`).replace('<details class="gba-options">',`<details class="gba-options" ${optionsOpen?'open':''}>`).replace('<div class="settings">',`<div class="settings">${btn('moveLanguage',`Golpes: ${CFG.moveLanguage==='en'?'English':'Português'}`)}`);
   const originalStarter=rStarter;

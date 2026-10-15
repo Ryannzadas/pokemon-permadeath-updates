@@ -599,7 +599,7 @@ function musicSync(){
         const pr = playing.play();
         if(pr && pr.then) pr.then(() => { if(musAudio===playing) showAudioNotice(''); }).catch(error => {
           if(musAudio!==playing || error.name==='AbortError') return;
-          showAudioNotice(error.name==='NotAllowedError' ? 'Clique em Ativar áudio para ouvir.' : 'Não foi possível tocar o áudio. Extraia o ZIP inteiro antes de abrir o jogo.');
+          showAudioNotice(error.name==='NotAllowedError' ? 'Clique em Ativar áudio para ouvir.' : 'Não foi possível reproduzir o áudio.');
         });
       }catch(e){ showAudioNotice('Não foi possível iniciar o áudio. Clique em Ativar áudio.'); }
     }
@@ -620,7 +620,7 @@ function musicStart(kind, loop=true){
   if(file){
     try{
       const au = new Audio(file); au.loop = loop; au.volume = .3; musAudio = au;
-      au.onerror = () => { if(musAudio===au){ showAudioNotice('Arquivo de áudio indisponível. Extraia todas as pastas do ZIP.'); musAudio = null; if(TRACKS[fallback]) musicSynth(fallback); } }; // arquivo não achado: usa a faixa do jogo
+      au.onerror = () => { if(musAudio===au){ showAudioNotice('Esta faixa de áudio está indisponível.'); musAudio = null; if(TRACKS[fallback]) musicSynth(fallback); } }; // arquivo não achado: usa a faixa do jogo
       if(MENU_MUSIC[kind]) au.onended = () => { if(musAudio===au && menuPlayerVisible()) playCityMusic(kind); };
       au.onplay = au.onpause = au.ontimeupdate = au.onloadedmetadata = () => { if(musAudio===au) updatePlaylistStatus(); };
       musicSync();
@@ -1321,8 +1321,9 @@ const ACT = {
   release(i){ R.team[+i] = R.pending; R.pending = null; persist(); },
   skipCatch(){ R.pending = null; persist(); },
   retire(){ winRun(); },
-  abandon(){
-    if(!confirm('Abandonar esta jornada? A equipe e o progresso desta jornada serão perdidos. Pokédex, histórico e conquistas permanecem.')) return;
+  async abandon(){
+    const message='A equipe e o progresso desta jornada serão perdidos. Pokédex, histórico e conquistas permanecem.';
+    if(!(window.GameDialogs?await GameDialogs.confirm(message,{title:'Abandonar esta jornada?',confirmLabel:'Encerrar jornada'}):confirm('Abandonar esta jornada? '+message))) return;
     musicStop(); archiveRun('abandoned','Abandonada pelo treinador.'); R=null; S={screen:'title',msg:'',shop:false,sel:null};
     try{ SAVE_STORAGE.removeItem(SAVE_KEY); }catch(e){}
   },
@@ -1333,6 +1334,7 @@ const ACT = {
 $app.addEventListener('click', e => {
   const el = e.target.closest('[data-act]');
   if(!el || el.disabled) return;
+  if(window.GameCommands){void GameCommands.dispatch(el.dataset.act,el.dataset.v||'');return;}
   const fn = ACT[el.dataset.act]; if(!fn) return;
   if(S.screen!=='battle') S.msg = '';
   menuActionSound(el.dataset.act,el.dataset.v);

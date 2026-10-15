@@ -10,8 +10,10 @@
   Object.entries(LEGACY).forEach(([old,id])=>{if(DATA.moves[id])M[old]={...DATA.moves[id]};});
   M.struggle={n:'Luta desesperada',en:'Struggle',t:'normal',p:50,a:100,pp:1,cat:2};
   const originalIds=new Set(Object.keys(SP));
+  // Official names that capitalizing the id would get wrong.
+  const OFFICIAL_NAMES={'nidoran-f':'Nidoran♀','nidoran-m':'Nidoran♂','mr-mime':'Mr. Mime','mime-jr':'Mime Jr.'};
   Object.entries(DATA.species).forEach(([id,d])=>{
-    if(!SP[id])sp(id,id[0].toUpperCase()+id.slice(1),d.dex,d.types,[d.stats[0],d.stats[1],d.stats[2],d.stats[5]],.45,1,[]);
+    if(!SP[id])sp(id,OFFICIAL_NAMES[id]||id[0].toUpperCase()+id.slice(1),d.dex,d.types,[d.stats[0],d.stats[1],d.stats[2],d.stats[5]],.45,1,[]);
     const s=SP[id];s.stats=d.stats;s.learn=d.learn;s.evolution=d.evolutions;s.base=d.base;
     // Use the current PokeAPI typing consistently across the existing roster.
     s.t=d.types.slice();if(!s.t.length)s.t=['normal'];
