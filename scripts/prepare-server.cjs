@@ -1,0 +1,2 @@
+'use strict';
+const fs=require('node:fs'),path=require('node:path');const root=path.resolve(__dirname,'..'),dest=path.join(root,'server/runtime');fs.mkdirSync(dest,{recursive:true});for(const name of ['assets.js','pokemon-data.js','legendary-data.js','mode-store.js','game.js','ability-data.js','strategy.js','journey-model.js','expansion.js','team-model.js','inventory-model.js','online-dex-data.js','online-dex.js'])fs.copyFileSync(path.join(root,'game',name),path.join(dest,name));

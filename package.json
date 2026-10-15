@@ -1,0 +1,74 @@
+{
+  "name": "pokemon-permadeath-visual-test",
+  "version": "0.4.1-test.7",
+  "description": "Pokemon Permadeath para Windows com progresso local e conta Google",
+  "private": true,
+  "main": "desktop/main.cjs",
+  "author": "Pokemon Permadeath",
+  "scripts": {
+    "start": "electron .",
+    "dist:win": "electron-builder --win nsis --x64 --publish never",
+    "test:camp": "node scripts/test-camp.cjs",
+    "test": "node scripts/test-all.cjs",
+    "test:ui": "node tests/battle-notices-ui.cjs && node tests/shop-badges-ui.cjs && node tests/exploration-ui.cjs && node tests/presentation-postgame.cjs && node tests/sylveon-ui.cjs && node tests/refresh-ui.cjs && node tests/camp-ui.cjs && node tests/journey-ui.cjs && node tests/update-ui.cjs && node tests/social-ui.cjs && node tests/form-state-ui.cjs",
+    "test:visual": "node tests/visual-layout.cjs",
+    "test:interface": "node tests/react-interface.cjs && node tests/interface-screens.cjs && node tests/double-slots-ui.cjs",
+    "audit:effects": "node scripts/audit-effects.cjs",
+    "build:ui": "node scripts/build-react.cjs",
+    "prestart": "npm run build:ui",
+    "predist:win": "npm run build:ui",
+    "test:react": "node tests/react-interface.cjs",
+    "test:approved": "node tests/approved-interface.cjs"
+  },
+  "dependencies": {
+    "electron-updater": "6.8.10"
+  },
+  "devDependencies": {
+    "electron": "44.5.1",
+    "electron-builder": "26.15.3",
+    "esbuild": "0.25.11",
+    "linkedom": "0.18.12",
+    "phaser": "3.90.0",
+    "playwright": "^1.56.1",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "build": {
+    "appId": "com.pokemonpermadeath.visualtest",
+    "productName": "Pokemon Permadeath - Teste Visual",
+    "asar": true,
+    "files": [
+      "desktop/**/*",
+      "game/**/*",
+      "firebase-config.json",
+      "package.json",
+      "multiplayer-config.json"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/app-icon.ico",
+      "signExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "deleteAppDataOnUninstall": false,
+      "artifactName": "Pokemon-Permadeath-Setup-${version}.${ext}",
+      "script": "build/nsis/installer.nsi",
+      "installerIcon": "build/app-icon.ico",
+      "uninstallerIcon": "build/app-icon.ico"
+    }
+  }
+}

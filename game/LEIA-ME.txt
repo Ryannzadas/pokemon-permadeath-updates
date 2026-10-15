@@ -1,0 +1,19 @@
+POKÉMON PERMADEATH — 0.3.4
+
+Instale usando Pokemon-Permadeath-Setup-0.3.4.exe e abra o aplicativo.
+A fonte é para desenvolvimento; não é necessário abrir index.html para jogar.
+
+Jogar permite escolher Clássico ou Permadeath. Cada modo tem seu próprio save.
+Continuar oferece os dois quando disponíveis. Conta, Pokédex e cosméticos são compartilhados.
+No Clássico, cure a equipe gratuitamente no Centro. No Permadeath, treino não permite captura e recupera o HP dos Pokémon que entraram vivos.
+
+Mapas: WASD/setas ou clique para caminhar, E ou clique próximo para interagir, Esc para sair.
+Som e música são controlados pelos ícones superiores. Menus sorteiam suas músicas e avançam as faixas automaticamente. Centro e loja possuem temas próprios.
+
+O perfil concentra conta e sincronização. O ícone de salvamento aparece temporariamente após gravar.
+As notas completas e instruções de desenvolvimento estão no README.md e RELEASE-NOTES-0.3.4.md da fonte.
+
+SYLVEON
+Eevee precisa de amizade 160+, um golpe Fada equipado e subir de nível. Vale de dia ou de noite. Veja a condição e o botão no sumário.
+
+0.3.4: limite de nível por etapa, loja com quantidades, insígnias com sprites e avisos de níveis/golpes após batalhas.

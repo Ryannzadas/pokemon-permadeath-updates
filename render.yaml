@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: pokemon-permadeath-social
+    runtime: node
+    plan: free
+    buildCommand: node scripts/prepare-server.cjs && npm ci --prefix server
+    startCommand: npm start --prefix server
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 22.16.0
+      - key: FIREBASE_PROJECT_ID
+        value: pokemon-permadeath
+      - key: GOOGLE_APPLICATION_CREDENTIALS
+        value: /etc/secrets/firebase-service-account.json

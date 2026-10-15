@@ -1,0 +1,610 @@
+{
+  "source": "https://github.com/PokeAPI/pokeapi/tree/master/data/v2/csv; version_group_id=20 (Sword/Shield)",
+  "species": {
+    "dex": 700,
+    "types": [
+      "fairy"
+    ],
+    "base": "eevee",
+    "stats": [
+      95,
+      65,
+      65,
+      110,
+      130,
+      60
+    ],
+    "learn": [
+      {
+        "id": "attract",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "baton-pass",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "body-slam",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "calm-mind",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "charm",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "dazzling-gleam",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "dig",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "disarming-voice",
+        "level": 0,
+        "method": "level"
+      },
+      {
+        "id": "draining-kiss",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "endure",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "facade",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "fake-tears",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "focus-energy",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "giga-impact",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "helping-hand",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "hyper-beam",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "hyper-voice",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "iron-tail",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "light-screen",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "magical-leaf",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "misty-terrain",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "mystical-fire",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "pay-day",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "play-rough",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "protect",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "psyshock",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "rain-dance",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "reflect",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "rest",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "retaliate",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "round",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "safeguard",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "shadow-ball",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "skill-swap",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "sleep-talk",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "snore",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "stored-power",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "substitute",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "sunny-day",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "swift",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "weather-ball",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "work-up",
+        "level": 0,
+        "method": "machine"
+      },
+      {
+        "id": "baton-pass",
+        "level": 1,
+        "method": "level"
+      },
+      {
+        "id": "bite",
+        "level": 1,
+        "method": "level"
+      },
+      {
+        "id": "charm",
+        "level": 1,
+        "method": "level"
+      },
+      {
+        "id": "copycat",
+        "level": 1,
+        "method": "level"
+      },
+      {
+        "id": "covet",
+        "level": 1,
+        "method": "level"
+      },
+      {
+        "id": "disarming-voice",
+        "level": 1,
+        "method": "level"
+      },
+      {
+        "id": "double-edge",
+        "level": 1,
+        "method": "level"
+      },
+      {
+        "id": "growl",
+        "level": 1,
+        "method": "level"
+      },
+      {
+        "id": "helping-hand",
+        "level": 1,
+        "method": "level"
+      },
+      {
+        "id": "tackle",
+        "level": 1,
+        "method": "level"
+      },
+      {
+        "id": "tail-whip",
+        "level": 1,
+        "method": "level"
+      },
+      {
+        "id": "take-down",
+        "level": 1,
+        "method": "level"
+      },
+      {
+        "id": "sand-attack",
+        "level": 5,
+        "method": "level"
+      },
+      {
+        "id": "quick-attack",
+        "level": 10,
+        "method": "level"
+      },
+      {
+        "id": "baby-doll-eyes",
+        "level": 15,
+        "method": "level"
+      },
+      {
+        "id": "swift",
+        "level": 20,
+        "method": "level"
+      },
+      {
+        "id": "light-screen",
+        "level": 25,
+        "method": "level"
+      },
+      {
+        "id": "draining-kiss",
+        "level": 30,
+        "method": "level"
+      },
+      {
+        "id": "misty-terrain",
+        "level": 35,
+        "method": "level"
+      },
+      {
+        "id": "skill-swap",
+        "level": 40,
+        "method": "level"
+      },
+      {
+        "id": "psych-up",
+        "level": 45,
+        "method": "level"
+      },
+      {
+        "id": "moonblast",
+        "level": 50,
+        "method": "level"
+      },
+      {
+        "id": "last-resort",
+        "level": 55,
+        "method": "level"
+      }
+    ],
+    "evolutions": [],
+    "abilities": [
+      {
+        "id": "cute-charm",
+        "slot": 1
+      }
+    ]
+  },
+  "eevee_fairy_learn": [
+    {
+      "id": "baby-doll-eyes",
+      "level": 15,
+      "method": "level"
+    },
+    {
+      "id": "charm",
+      "level": 45,
+      "method": "level"
+    }
+  ],
+  "moves": {
+    "disarming-voice": {
+      "n": "Voz Desarmante",
+      "en": "Disarming Voice",
+      "t": "fairy",
+      "p": 40,
+      "a": 100,
+      "pp": 15,
+      "pri": 0,
+      "cat": 3,
+      "target": 11,
+      "effect": 381,
+      "meta": {
+        "move_id": "574",
+        "meta_category_id": "0",
+        "meta_ailment_id": "0",
+        "min_hits": "",
+        "max_hits": "",
+        "min_turns": "",
+        "max_turns": "",
+        "drain": "0",
+        "healing": "0",
+        "crit_rate": "0",
+        "ailment_chance": "0",
+        "flinch_chance": "0",
+        "stat_chance": "0"
+      },
+      "changes": []
+    },
+    "draining-kiss": {
+      "n": "Beijo Drenante",
+      "en": "Draining Kiss",
+      "t": "fairy",
+      "p": 50,
+      "a": 100,
+      "pp": 10,
+      "pri": 0,
+      "cat": 3,
+      "target": 10,
+      "effect": 349,
+      "meta": {
+        "move_id": "577",
+        "meta_category_id": "8",
+        "meta_ailment_id": "0",
+        "min_hits": "",
+        "max_hits": "",
+        "min_turns": "",
+        "max_turns": "",
+        "drain": "75",
+        "healing": "0",
+        "crit_rate": "0",
+        "ailment_chance": "0",
+        "flinch_chance": "0",
+        "stat_chance": "0"
+      },
+      "changes": []
+    },
+    "misty-terrain": {
+      "n": "Campo Nebuloso",
+      "en": "Misty Terrain",
+      "t": "fairy",
+      "p": 0,
+      "a": 100,
+      "pp": 10,
+      "pri": 0,
+      "cat": 1,
+      "target": 12,
+      "effect": 353,
+      "meta": {
+        "move_id": "581",
+        "meta_category_id": "10",
+        "meta_ailment_id": "0",
+        "min_hits": "",
+        "max_hits": "",
+        "min_turns": "",
+        "max_turns": "",
+        "drain": "0",
+        "healing": "0",
+        "crit_rate": "0",
+        "ailment_chance": "0",
+        "flinch_chance": "0",
+        "stat_chance": "0"
+      },
+      "changes": []
+    },
+    "play-rough": {
+      "n": "Play Rough",
+      "en": "Play Rough",
+      "t": "fairy",
+      "p": 90,
+      "a": 90,
+      "pp": 10,
+      "pri": 0,
+      "cat": 2,
+      "target": 10,
+      "effect": 69,
+      "meta": {
+        "move_id": "583",
+        "meta_category_id": "6",
+        "meta_ailment_id": "0",
+        "min_hits": "",
+        "max_hits": "",
+        "min_turns": "",
+        "max_turns": "",
+        "drain": "0",
+        "healing": "0",
+        "crit_rate": "0",
+        "ailment_chance": "0",
+        "flinch_chance": "0",
+        "stat_chance": "10"
+      },
+      "changes": [
+        [
+          2,
+          -1
+        ]
+      ]
+    },
+    "moonblast": {
+      "n": "Explosão Lunar",
+      "en": "Moonblast",
+      "t": "fairy",
+      "p": 95,
+      "a": 100,
+      "pp": 15,
+      "pri": 0,
+      "cat": 3,
+      "target": 10,
+      "effect": 72,
+      "meta": {
+        "move_id": "585",
+        "meta_category_id": "6",
+        "meta_ailment_id": "0",
+        "min_hits": "",
+        "max_hits": "",
+        "min_turns": "",
+        "max_turns": "",
+        "drain": "0",
+        "healing": "0",
+        "crit_rate": "0",
+        "ailment_chance": "0",
+        "flinch_chance": "0",
+        "stat_chance": "30"
+      },
+      "changes": [
+        [
+          4,
+          -1
+        ]
+      ]
+    },
+    "mystical-fire": {
+      "n": "Mystical Fire",
+      "en": "Mystical Fire",
+      "t": "fire",
+      "p": 75,
+      "a": 100,
+      "pp": 10,
+      "pri": 0,
+      "cat": 3,
+      "target": 10,
+      "effect": 72,
+      "meta": {
+        "move_id": "595",
+        "meta_category_id": "6",
+        "meta_ailment_id": "0",
+        "min_hits": "",
+        "max_hits": "",
+        "min_turns": "",
+        "max_turns": "",
+        "drain": "0",
+        "healing": "0",
+        "crit_rate": "0",
+        "ailment_chance": "0",
+        "flinch_chance": "0",
+        "stat_chance": "100"
+      },
+      "changes": [
+        [
+          4,
+          -1
+        ]
+      ]
+    },
+    "dazzling-gleam": {
+      "n": "Brilho Deslumbrante",
+      "en": "Dazzling Gleam",
+      "t": "fairy",
+      "p": 80,
+      "a": 100,
+      "pp": 10,
+      "pri": 0,
+      "cat": 3,
+      "target": 11,
+      "effect": 1,
+      "meta": {
+        "move_id": "605",
+        "meta_category_id": "0",
+        "meta_ailment_id": "0",
+        "min_hits": "",
+        "max_hits": "",
+        "min_turns": "",
+        "max_turns": "",
+        "drain": "0",
+        "healing": "0",
+        "crit_rate": "0",
+        "ailment_chance": "0",
+        "flinch_chance": "0",
+        "stat_chance": "0"
+      },
+      "changes": []
+    },
+    "baby-doll-eyes": {
+      "n": "Olhos de Bebê",
+      "en": "Baby-Doll Eyes",
+      "t": "fairy",
+      "p": 0,
+      "a": 100,
+      "pp": 30,
+      "pri": 1,
+      "cat": 1,
+      "target": 10,
+      "effect": 365,
+      "meta": {
+        "move_id": "608",
+        "meta_category_id": "2",
+        "meta_ailment_id": "0",
+        "min_hits": "",
+        "max_hits": "",
+        "min_turns": "",
+        "max_turns": "",
+        "drain": "0",
+        "healing": "0",
+        "crit_rate": "0",
+        "ailment_chance": "0",
+        "flinch_chance": "0",
+        "stat_chance": "0"
+      },
+      "changes": [
+        [
+          2,
+          -1
+        ]
+      ]
+    }
+  }
+}

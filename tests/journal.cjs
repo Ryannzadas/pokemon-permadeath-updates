@@ -1,0 +1,17 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert/strict');
+const source=fs.readFileSync(require.resolve('../game/game.js'),'utf8').replace(/\nrender\(\);\n\nwindow.desktopCanManage/,'\n\nwindow.desktopCanManage');
+const slots={'umavida-meta-v1':JSON.stringify({best:12,runs:4,champ:false})};let accepts=false;
+const node={addEventListener(){}};const c={console,setTimeout:()=>0,clearTimeout(){},confirm:()=>accepts,localStorage:{getItem:k=>slots[k]||null,setItem:(k,v)=>slots[k]=v,removeItem:k=>delete slots[k]},window:{addEventListener(){},dispatchEvent(){}},document:{getElementById:()=>node,addEventListener(){},querySelector:()=>null},SPRITES:{},ITEM_SPR:{},Event:class{}};
+vm.createContext(c);vm.runInContext(fs.readFileSync(require.resolve('../game/mode-store.js'),'utf8'),c);c.ModeSaveStore=c.window.ModeSaveStore;vm.runInContext(source,c);const run=s=>vm.runInContext(s,c);
+run('musicStop=()=>{};sfx=()=>{};render=()=>{};');
+assert.equal(run('META.runs'),4);assert.equal(run('META.best'),12);assert.equal(run('META.history.length'),0);assert(run("earnedAchievements().some(a=>a.id==='fighter')"));
+run("newRun('bulbasaur')");assert(run("META.caught.includes('bulbasaur')"));assert(run("META.seen.includes('bulbasaur')"));assert(run('profileAvatars().includes(143)'));
+run("dexRecord('gengar');dexRecord('ivysaur',true)");assert(!run("META.caught.includes('gengar')"));assert(run("META.caught.includes('ivysaur')"));
+const saved=slots['umavida-save-v1'];run('ACT.abandon()');assert.equal(slots['umavida-save-v1'],saved);assert.equal(run('META.runs'),4);
+accepts=true;run('ACT.abandon()');assert.equal(run('META.history.length'),1);assert.equal(run('META.history[0].outcome'),'abandoned');assert.equal(run('META.runs'),5);assert(!slots['umavida-save-v1']);assert(run("META.caught.includes('bulbasaur')"));
+run("newRun('charmander');R.won=10;R.lastEnemy='gengar';gameOver()");assert.match(run('META.history[0].cause'),/Gengar/);assert.equal(run('META.history[0].wins'),10);assert.equal(run('META.history[0].team[0].sp'),'charmander');const count=run('META.runs');run('gameOver()');assert.equal(run('META.runs'),count);
+run("newRun('squirtle');winRun()");assert(run('META.champ'));assert(run('profileAvatars().includes(149)'));c.window.desktopSaveProfile({name:'Test',avatar:149,title:'Campeão da Liga'});assert.equal(JSON.parse(slots['umavida-cfg']).profile.title,'Campeão da Liga');
+run("newRun('pikachu');S.screen='title'");accepts=false;const before=slots['umavida-save-v1'];run('ACT.start()');assert.equal(slots['umavida-save-v1'],before);accepts=true;run('ACT.start()');assert.equal(run('S.screen'),'starter');assert.equal(run('META.history[0].outcome'),'abandoned');assert(!slots['umavida-save-v1']);
+run("newRun('bulbasaur');SAVE_STORAGE.setItem(SAVE_KEY,JSON.stringify({R,S,inBattle:true}));S.screen='title';ACT.start()");assert.equal(run('META.history[0].outcome'),'defeat');assert.match(run('META.history[0].cause'),/fechado/);
+for(let i=0;i<105;i++)run("newRun('bulbasaur');archiveRun('abandoned','test')");assert.equal(run('META.history.length'),100);assert(run("rJournal().includes('Diário do treinador')"));
+const restored=JSON.parse(slots['umavida-meta-v1']);assert(restored.caught.includes('ivysaur'));assert.equal(restored.history.length,100);console.log('PASS journal: legacy migration, permanent dex, loss/cancel/replacement history, idempotence, rewards and bounded storage');

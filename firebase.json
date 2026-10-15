@@ -1,0 +1,18 @@
+{
+  "functions": [
+    {
+      "source": "server",
+      "codebase": "social",
+      "predeploy": [
+        "node scripts/prepare-server.cjs"
+      ],
+      "ignore": [
+        "node_modules",
+        "*.log"
+      ]
+    }
+  ],
+  "firestore": {
+    "rules": "firestore.rules"
+  }
+}

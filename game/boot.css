@@ -1,0 +1,10 @@
+/* Applied before game renderers execute. */
+html[data-ui-state] body{background:#f5f2e9!important;color:#20392d!important}
+html[data-ui-state][data-theme=dark] body{background:#14221d!important;color:#edf3e9!important}
+html[data-ui-state] body>:not(#ui-boot):not(script):not(noscript){visibility:hidden!important;pointer-events:none!important}
+#ui-boot{position:fixed;inset:0;z-index:10000;display:grid;place-content:center;gap:16px;text-align:center;padding:24px;font:16px/1.5 system-ui,sans-serif}
+#ui-boot p{margin:0;color:inherit;font:inherit}
+#ui-boot button{justify-self:center;background:#28533e;color:#fffaf0;border:1px solid #72876c;border-radius:10px;padding:10px 18px;font:600 14px/1.4 system-ui,sans-serif;cursor:pointer}
+#ui-boot button[hidden]{display:none}
+#ui-boot button:focus-visible{outline:3px solid #c49a44;outline-offset:3px}
+html:not([data-ui-state]) #ui-boot{display:none}

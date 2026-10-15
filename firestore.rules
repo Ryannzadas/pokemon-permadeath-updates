@@ -1,0 +1,18 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function account(uid) {
+      return request.auth != null && request.auth.uid == uid && request.auth.token.email_verified == true;
+    }
+    match /players/{uid} {
+      allow get: if account(uid);
+      allow create, update: if account(uid)
+        && request.resource.data.keys().hasOnly(['payload', 'schema'])
+        && request.resource.data.payload is string
+        && request.resource.data.payload.size() <= 700000
+        && request.resource.data.schema == 1;
+    }
+    // All social/battle/league records are handled by the authenticated server.
+    match /{document=**} { allow read, write: if false; }
+  }
+}

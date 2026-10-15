@@ -1,0 +1,9 @@
+{
+  "species": 1025,
+  "moves": 919,
+  "abilities": 284,
+  "implementedAbilities": 17,
+  "pendingAbilities": 267,
+  "moveEffectsNeedingReview": 322,
+  "method": "Static inventory and metadata screening, not exhaustive official-rule equivalence."
+}

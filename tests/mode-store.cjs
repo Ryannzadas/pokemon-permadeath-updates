@@ -1,0 +1,13 @@
+const assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
+const key='umavida-save-v1',raw={};let fail=false;
+const c={window:{},console};vm.createContext(c);vm.runInContext(fs.readFileSync(require.resolve('../game/mode-store.js'),'utf8'),c);
+const mode=c.window.ModeSaveStore,storage=mode.wrap({getItem:k=>raw[k]||null,setItem:(k,v)=>{if(fail)throw Error('disk');raw[k]=v;},removeItem:k=>delete raw[k]});
+const run=(mode,money)=>({R:{mode,money,team:[{sp:'bulbasaur'}]},S:{screen:'hub'}});
+raw[key]=JSON.stringify(run('permadeath',10));assert.equal(JSON.parse(storage.getItem(key)).R.money,10);mode.select('classic');assert.equal(storage.getItem(key),null);storage.setItem(key,JSON.stringify(run('classic',20)));assert.equal(mode.slots().permadeath.R.money,10);assert.equal(mode.slots().classic.R.money,20);
+const backup=raw[key];fail=true;assert.throws(()=>storage.setItem(key,JSON.stringify(run('classic',30))));assert.equal(raw[key],backup);fail=false;
+mode.select('permadeath');storage.setItem(key,JSON.stringify({...run('permadeath',15),inBattle:true,training:false}));assert.equal(mode.slots().classic.R.money,20);assert(mode.slots().permadeath.inBattle);storage.removeItem(key);assert.deepEqual(Object.keys(mode.slots()),['classic']);assert(require('../desktop/store.cjs').cleanSlots(raw));
+mode.select('classic');storage.removeItem(key);assert.equal(raw[key],undefined);console.log('PASS mode store: legacy migration, independent slots, battle markers, failed-write integrity and deletion preserves other mode.');
+
+for(const id of ['permadeath','classic']){mode.select(id);storage.setItem(key,JSON.stringify(run(id,10)));mode.select(id,'double');storage.setItem(key,JSON.stringify({...run(id,20),R:{...run(id,20).R,postgame:true}}));}
+assert.equal(Object.keys(mode.slots()).length,4);assert.equal(mode.slots().classic.R.money,10);assert.equal(mode.slots()['classic-double'].R.money,20);assert(require('../desktop/store.cjs').cleanSlots(raw));mode.select('classic-double');storage.removeItem(key);assert.equal(mode.slots().classic.R.money,10);assert.equal(Object.keys(mode.slots()).length,3);
+raw[key]=JSON.stringify({schema:2,activeMode:'classic',runs:{classic:{...run('classic',99),R:{...run('classic',99).R,postgame:true}},permadeath:run('permadeath',55)}});mode.select('classic-double');assert.equal(JSON.parse(storage.getItem(key)).R.money,99);assert(mode.slots()['classic-double']);assert.equal(mode.slots().classic,undefined);storage.setItem(key,storage.getItem(key));assert.equal(JSON.parse(raw[key]).schema,3);assert.equal(mode.slots().permadeath.R.money,55);console.log('PASS four slots, per-slot deletion, legacy double migration and desktop cloud validation.');
