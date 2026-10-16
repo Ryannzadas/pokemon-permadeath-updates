@@ -81,3 +81,19 @@ export function breathe(scene, target) {
   scene.tweens.add({ targets: target, scaleY: { from: target.scaleY || 1, to: (target.scaleY || 1) * 1.025 }, duration: 1100, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
   return target;
 }
+
+// Gym leaders and league trainers: their original animation (APNG converted to frame strips at build).
+export function addTrainer(scene, container, sprite, x, y, { scale = 1, originY = 1 } = {}) {
+  const info = window.TRAINER_ANIMS?.[sprite], key = `trainer-anim:${sprite}`;
+  const img = scene.add.sprite(x, y, '__DEFAULT').setOrigin(0.5, originY).setVisible(false);
+  container?.add(img);
+  if (!info) { ensureTexture(scene, 'leader:' + sprite, `assets/trainers/${sprite}.png`, () => { if (img.active) img.setTexture('leader:' + sprite).setScale(scale).setVisible(true); }); return img; }
+  const start = () => {
+    if (!img.active) return;
+    if (!scene.anims.exists(key)) scene.anims.create({ key, repeat: -1, frames: info.delays.map((duration, frame) => ({ key, frame, duration })) });
+    img.setTexture(key, 0).setScale(scale).setVisible(true).play(key);
+  };
+  if (scene.textures.exists(key)) start();
+  else { scene.load.spritesheet(key, `assets/trainers/sheets/${sprite}.png`, { frameWidth: info.width, frameHeight: info.height }); scene.load.once(`filecomplete-spritesheet-${key}`, start); if (!scene.load.isLoading()) scene.load.start(); }
+  return img;
+}

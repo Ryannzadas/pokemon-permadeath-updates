@@ -5,7 +5,7 @@
 import { WIDTH, HEIGHT, TEXT, COLORS, hpColor } from '../config.js';
 import { pixelText, drawWindow, Menu, Typewriter } from '../ui.js';
 import { command, engineOptions } from '../bridge.js';
-import { ensureTexture, addSpecies, addIcon, addWalker, breathe } from '../assets.js';
+import { ensureTexture, addSpecies, addIcon, addWalker, addTrainer } from '../assets.js';
 import { defineScreenScene, iconScale, money } from './screen-base.js';
 
 const GOLD = '#e3bd69';
@@ -81,7 +81,7 @@ export function defineJourneyScenes(engine) {
 
       const info = trainer ? `Próximo desafio: ${trainer.name} · ${trainer.type ? TYPES[trainer.type]?.[0] : 'Tipos variados'} · ${trainer.team.length} Pokémon${boss ? ' · disponível agora' : ''}` : boss ? next.title : `Próxima batalha: ${R.battle + 1}`;
       this.message(S.msg || info, { y: HEIGHT - 56, h: 52 });
-      if (trainer && !S.msg) breathe(this, this.image('leader:' + trainer.sprite, `assets/trainers/${trainer.sprite}.png`, WIDTH - 36, HEIGHT - 8, { scale: 0.5 }));
+      if (trainer && !S.msg) addTrainer(this, this.root, trainer.sprite, WIDTH - 36, HEIGHT - 8, { scale: 0.5 });
     }
   }
 
@@ -94,8 +94,8 @@ export function defineJourneyScenes(engine) {
       this.cover('arena:' + (window.battleArenaName?.() || 'Estádio'), `assets/visual/${window.battleArenaName?.() || 'Estádio'}.webp`, 0.55);
       const role = document.querySelector('#app .trainer-intro > p')?.textContent.trim() || 'Desafio';
       this.root.add(pixelText(this, WIDTH / 2, 12, role.toUpperCase(), { size: TEXT.body, color: GOLD, shadow: '#202020' }).setOrigin(0.5, 0));
-      breathe(this, this.image('leader:' + t.sprite, `assets/trainers/${t.sprite}.png`, 96, 150, { scale: 1.5 }));
-      this.tweens.add({ targets: this.root.list.at(-1), x: { from: -40, to: 96 }, duration: 420, ease: 'Cubic.out' });
+      const leader = addTrainer(this, this.root, t.sprite, 96, 150, { scale: 1.5 });
+      this.tweens.add({ targets: leader, x: { from: -40, to: 96 }, duration: 420, ease: 'Cubic.out' });
       this.root.add(pixelText(this, 172, 34, t.name, { size: 40, color: '#ffffff', shadow: '#202020' }));
       this.root.add(pixelText(this, 174, 76, `${t.type ? 'Especialidade: ' + TYPES[t.type]?.[0] : 'Tipos variados'} · ${B.enemies.length} Pokémon`, { size: TEXT.large, color: '#e8f4fb', shadow: '#202020' }));
       B.enemies.forEach((m, i) => {
