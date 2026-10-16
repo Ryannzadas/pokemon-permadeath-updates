@@ -17,6 +17,12 @@
 .fr-battle .enemy-platform{left:calc(var(--u)*206)!important;top:calc(var(--u)*86)!important;width:calc(var(--u)*128)!important;height:calc(var(--u)*30)!important;right:auto!important;bottom:auto!important}
 .fr-battle .player-platform{left:calc(var(--u)*18)!important;top:calc(var(--u)*150)!important;width:calc(var(--u)*156)!important;height:calc(var(--u)*30)!important;right:auto!important;bottom:auto!important}
 
+/* FireRed/LeafGreen sprites are 64px: drawn 1.5x (96 units) like the GBA, back sprites resting on the text box. */
+.fr-battle .battle-mon.fr-gba{width:calc(var(--u)*96)!important;height:calc(var(--u)*96)!important}
+.fr-battle .battle-mon.enemy-mon.fr-gba{top:calc(var(--u)*5)!important}
+.fr-battle .battle-mon.player-mon.fr-gba{left:calc(var(--u)*48)!important;bottom:0!important;overflow:hidden}
+.fr-battle .battle-mon.fr-gba .art.big img{left:0!important;top:calc(var(--u)*var(--fr-drop,0))!important;width:100%!important;height:100%!important;object-fit:contain}
+
 /* Status boxes */
 .react-interface .fr-battle .battle-status{position:absolute!important;z-index:3;min-width:0!important;max-width:none!important;box-sizing:border-box;padding:calc(var(--u)*4) calc(var(--u)*7) calc(var(--u)*5)!important;background:#f8f8e0!important;color:#303030!important;border:calc(var(--u)*2) solid #405040!important;border-radius:calc(var(--u)*7) calc(var(--u)*2) calc(var(--u)*7) calc(var(--u)*2)!important;box-shadow:calc(var(--u)*3) calc(var(--u)*3) 0 #40504066!important;font-family:'Jersey 10',monospace!important}
 .react-interface .fr-battle .enemy-status{left:calc(var(--u)*16)!important;top:calc(var(--u)*18)!important;right:auto!important;bottom:auto!important;width:calc(var(--u)*152)!important}

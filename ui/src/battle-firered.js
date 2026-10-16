@@ -64,7 +64,8 @@ export function presentFireRed(stage,items){
  // Player status: HP numbers and EXP bar, as in the GBA games.
  const pm=R.team[B.playerSlots?.[0]??R.active];
  // FireRed/LeafGreen art from PokeAPI for species #1-386; later species keep the regular sprite.
- const gba=(img,m,side)=>{const dex=SP[m?.sp]?.dex;if(!img||!window.FRLG_SPRITES?.has(dex))return;img.src=`assets/sprites-frlg/${dex}-${side}.png`;img.closest('.battle-mon')?.classList.add('fr-gba');};
+ // The manifest gives each sprite's empty rows at the bottom; dropping by that rests it on the ground.
+ const gba=(img,m,side)=>{const dex=SP[m?.sp]?.dex,pad=window.FRLG_SPRITES?.[dex];if(!img||!pad)return;img.src=`assets/sprites-frlg/${dex}-${side}.png`;const box=img.closest('.battle-mon');box?.classList.add('fr-gba');box?.style.setProperty('--fr-drop',pad[side==='f'?0:1]*1.5);};
  gba(arena.querySelector('.enemy-mon img'),B.enemy,'f');gba(arena.querySelector('.player-mon img'),pm,'b');
  const ps=arena.querySelector('.player-status');
  if(ps&&pm&&!ps.querySelector('.fr-exp'))ps.insertAdjacentHTML('beforeend',`<div class="fr-exp"><span>EXP</span>${xpBar(pm)}</div>`);
