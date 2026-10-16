@@ -14,7 +14,7 @@ function commandItems(){
  const list=[item('bag','Mochila','menu','bag')];
  if(!B.train&&!B.boss&&!B.double)list.push(item('dex','Capturar','menu','ball'));
  list.push(item('team','Trocar','menu','switch',!R.team.some((m,i)=>m.hp>0&&!B.playerSlots.includes(i))));
- if(!B.double)list.push(item('back',B.train?'Encerrar treino':`Fugir · ₽${fleeCost()}`,'flee','',!B.train&&(B.boss||R.money<fleeCost())));
+ if(!B.double)list.push(item('back',B.train?'Encerrar treino':fleeLabel(),'flee','',!B.train&&(B.boss||R.money<fleeCost())));
  return list;
 }
 export function layoutBattle(){

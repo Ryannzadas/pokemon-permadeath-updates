@@ -2,9 +2,9 @@
 /* Run-local exploration and account-wide cosmetic rewards. No battle bonuses. */
 const JourneyModel=(()=>{
   const routes={
-    forest:{name:'Floresta',description:'Trilhas verdes · mais encontros de Planta e Inseto.',types:['grass','bug'],species:'bulbasaur'},
-    cave:{name:'Caverna',description:'Passagens rochosas · mais encontros de Pedra e Terra.',types:['rock','ground'],species:'geodude'},
-    lake:{name:'Lago',description:'Margens tranquilas · mais encontros de Água.',types:['water'],species:'squirtle'}
+    forest:{name:'Floresta',description:'Trilhas verdes · mais encontros de Planta, Inseto, Normal e Voador.',types:['grass','bug','normal','flying'],species:'bulbasaur'},
+    cave:{name:'Caverna',description:'Passagens rochosas · mais encontros de Pedra, Terra, Lutador e Aço.',types:['rock','ground','fighting','steel'],species:'geodude'},
+    lake:{name:'Lago',description:'Margens tranquilas · mais encontros de Água, Gelo e Elétrico.',types:['water','ice','electric'],species:'squirtle'}
   };
   const missions=[
     {id:'observer',name:'Olhar curioso',description:'Observe 8 espécies diferentes nesta jornada.',goal:8,title:'Observador',avatar:54},

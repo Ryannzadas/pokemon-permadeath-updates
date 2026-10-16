@@ -1,6 +1,14 @@
 # Pokémon Permadeath — teste das telas aprovadas
 
-Versão **0.4.1-test.9**.
+Versão **0.4.1-test.10**.
+
+## Novidades da test.10
+
+- Pokémon acima do #386 (sem sprite do FireRed) aparecem em tamanho proporcional na batalha.
+- Fugir no Clássico não custa mais dinheiro (Permadeath continua cobrando).
+- Selvagens mais variados: rotas com mais tipos (Floresta: Planta/Inseto/Normal/Voador; Caverna: Pedra/Terra/Lutador/Aço; Lago: Água/Gelo/Elétrico) e iniciais regionais com 1/3 da chance.
+
+## test.9
 
 ## Novidades da test.9
 

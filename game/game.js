@@ -969,13 +969,15 @@ async function throwBall(id){
     await enemyTurn();
   }
 }
-const fleeCost = () => 10 + R.battle*3;
+// Fleeing is free in Classic, as in the main games; Permadeath charges for it.
+const fleeCost = () => R?.mode==='classic' ? 0 : 10 + R.battle*3;
+const fleeLabel = () => fleeCost() ? `Fugir · ₽${fleeCost()}` : 'Fugir';
 async function flee(){
   if(B.train){if(!B.lock)endTraining('Treino encerrado. A tentativa foi consumida, sem recompensa.');return;}
   const cost = fleeCost();
   if(B.lock || B.boss || R.money<cost) return;
   B.lock = true; R.money -= cost;
-  await say(`Você largou ₽ ${cost} e tentou fugir...`);
+  await say(cost ? `Você largou ₽ ${cost} e tentou fugir...` : 'Você tentou fugir...');
   if(Math.random() < .55){
     await say('Conseguiu escapar!');
     musicStop(); B = null; S.screen = 'hub'; S.msg = 'Você fugiu. Sem recompensa.';
@@ -1164,7 +1166,7 @@ function rBattle(){
       <button class="btn" data-act="menu" data-v="bag" ${lk}>Mochila</button>
       <button class="btn" data-act="menu" data-v="ball" ${(lk||B.boss||B.train)?'disabled':''}>${B.train?'Treino: sem captura':B.boss?'Chefe: sem captura':'Capturar'}</button>
       <button class="btn" data-act="menu" data-v="switch" ${(lk||R.team.filter((m,i)=>m.hp>0&&i!==R.active).length===0)?'disabled':''}>Trocar</button>
-      <button class="btn alt" data-act="flee" ${(lk||(!B.train&&(B.boss||R.money<fleeCost())))?'disabled':''} title="${B.train?'Consome a tentativa, sem recompensa':'Custa dinheiro mesmo se falhar'}">${B.train?'Encerrar treino':`Fugir (₽ ${fleeCost()})`}</button>
+      <button class="btn alt" data-act="flee" ${(lk||(!B.train&&(B.boss||R.money<fleeCost())))?'disabled':''} title="${B.train?'Consome a tentativa, sem recompensa':fleeCost()?'Custa dinheiro mesmo se falhar':'Pode falhar'}">${B.train?'Encerrar treino':fleeCost()?`Fugir (₽ ${fleeCost()})`:'Fugir'}</button>
     </div>`;
   } else if(B.menu==='bag'){
     ctl = `<div class="list">${['potion','super'].map(id => `<button class="btn alt" data-act="bagUse" data-v="${id}" ${(lk||!R.bag[id]||pm.hp>=pm.maxHp)?'disabled':''}>${ITEMS[id].ico} ${ITEMS[id].n} ×${R.bag[id]} <span class="mute">${ITEMS[id].d}</span></button>`).join('')}
