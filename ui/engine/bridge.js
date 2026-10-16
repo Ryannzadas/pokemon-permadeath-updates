@@ -30,11 +30,13 @@ export function engineOptions(selector) {
     const small = button.querySelector('small');
     const label = [...button.childNodes].filter(n => n !== small && !(n.nodeType === 1 && n.matches('.art,img,.item-sprite')))
       .map(n => n.textContent).join('').replace(/\s+/g, ' ').trim();
+    // A generic button inside a titled card (e.g. "Pegar" on a reward card) takes the card's title and text.
+    const card = button.closest('.card'), title = card?.querySelector('h3')?.textContent.replace(/\s+/g, ' ').trim();
     return {
-      action: button.dataset.act, value: button.dataset.v ?? '', label,
-      sub: small?.textContent.trim() || '', disabled: button.disabled,
+      action: button.dataset.act, value: button.dataset.v ?? '', label: title || label,
+      sub: title ? card.querySelector('.mute,.tiny')?.textContent.trim() || '' : small?.textContent.trim() || '', disabled: button.disabled,
       color: button.style.getPropertyValue('--move-color').trim(),
-      icon: button.querySelector('img')?.getAttribute('src') || '',
+      icon: (button.querySelector('img') || (title ? card.querySelector('img') : null))?.getAttribute('src') || '',
     };
   }).filter(o => o.action);
 }

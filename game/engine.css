@@ -1,0 +1,5 @@
+/* HTML pieces that live over the Phaser game: text fields and notices. */
+#game-stage canvas{image-rendering:pixelated;outline:none}
+body .game-text-field{position:fixed!important;z-index:1001;box-sizing:border-box;min-height:0!important;margin:0!important;padding:0 .4em!important;border:0!important;border-radius:0!important;outline:none!important;box-shadow:none!important;background:transparent!important;color:#303030!important;font-family:"Jersey 10",monospace!important;line-height:1!important;caret-color:#d8683c;visibility:visible!important}
+/* Post-battle progress notices stay readable above the game. */
+body.game-stage-active .battle-growth-notice{z-index:1002}

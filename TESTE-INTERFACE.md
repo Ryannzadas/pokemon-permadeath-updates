@@ -1,6 +1,15 @@
 # Pokémon Permadeath — teste das telas aprovadas
 
-Versão **0.4.1-test.10**.
+Versão **0.4.1-test.11**.
+
+## Novidades da test.11
+
+- Título, escolha de modo, continuar, personagem, nome e inicial agora rodam no motor de jogo Phaser.
+- Menu da jornada, apresentação dos líderes e telas de resultado (vitória, recompensas, derrota, campeão) também.
+- Tudo navegável com teclado/controle; o mouse continua funcionando.
+- Loja, equipe, mochila, Pokédex, Diário, PC, acampamento, Centro, rotas, Social e Team Builder ainda abrem na interface anterior (fase 3 em diante).
+
+## test.10
 
 ## Novidades da test.10
 

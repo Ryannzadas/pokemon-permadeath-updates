@@ -22,7 +22,7 @@ let browser;
     window.desktopAPI = { onStatus: () => {}, status: async () => ({ ok: true, value: { configured: true, user: { uid: 't' }, dirty: false, updatedAt: 1, update: { phase: 'disabled' } } }), sync: async () => ({ ok: true, value: {} }), storage: { getItem: k => localStorage.getItem(k), setItem: (k, v) => localStorage.setItem(k, v), removeItem: k => localStorage.removeItem(k) } };
   });
   await page.goto('http://127.0.0.1:' + server.address().port);
-  await page.locator('.visual-title').waitFor();
+  await page.locator('.visual-title').waitFor({ state: 'attached' });
   const key = async code => { await page.keyboard.press(code); await page.waitForTimeout(120); };
   const scene = fn => page.evaluate(`(()=>{const s=GameEngine.game.scene.getScene('battle');return (${fn})(s);})()`);
   const labels = () => scene('s=>s.menu?s.menu.items.map(i=>i.label):[]');
@@ -63,8 +63,8 @@ let browser;
     if (await page.evaluate(() => !B.lock)) await key('z'); else await page.waitForTimeout(250);
   }
   assert.notEqual(await page.evaluate(() => S.screen), 'battle');
-  assert.equal(await page.evaluate(() => GameEngine.active), null);
-  assert.equal(await page.evaluate(() => document.getElementById('game-stage').hidden), true);
+  // The battle scene hands over to the next screen (a result or journey scene, or an HTML screen).
+  await page.waitForFunction(() => GameEngine.active !== 'battle');
 
   // Doubles: each Pokémon gets its turn and targets are picked in the text box.
   // A fresh run, so the previous battle's random outcome (win, loss, pending reward) does not matter.
@@ -78,6 +78,6 @@ let browser;
   assert.match(await scene('s=>s.typer?.full||""'), /vai fazer\?$/);
 
   assert.deepEqual(errors, []);
-  console.log('PASS engine battle: Phaser stage takes the window, command/fight/bag/party menus by keyboard, forced replacement, full keyboard battle back to the next screen, doubles turn order and targets, no errors.');
+  console.log('PASS engine battle: Phaser stage takes the window, command/fight/bag/party menus by keyboard, forced replacement, full keyboard battle hands over to the next screen, doubles turn order and targets, no errors.');
   await browser.close(); server.close();
 })().catch(async e => { console.error(e); await browser?.close(); server.close(); process.exit(1); });

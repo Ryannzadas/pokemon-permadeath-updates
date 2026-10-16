@@ -4,6 +4,7 @@
 import { WIDTH, HEIGHT, TEXT, COLORS, hpColor } from '../config.js';
 import { pixelText, drawWindow, Menu, Typewriter } from '../ui.js';
 import { command, engineOptions, enginePrompt } from '../bridge.js';
+import { ensureTexture, pixelBounds } from '../assets.js';
 
 const ARENA_H = 198;
 const BOX_Y = ARENA_H;
@@ -43,7 +44,7 @@ export const defineBattleScene = () => class BattleScene extends Phaser.Scene {
 
   // ---------- state -> scene ----------
   sync() {
-    if (!this.sys.isActive() || !B) return;
+    if (!this.layerUi || this.sys.isSleeping() || !B) return;
     if (this.battle !== B) { this.battle = B; this.fight = false; this.moveIndex = 0; this.resetField(); }
     this.syncArena();
     this.syncField();
@@ -375,27 +376,6 @@ export const defineBattleScene = () => class BattleScene extends Phaser.Scene {
   }
 
   // ---------- assets ----------
-  ensureTexture(key, url, done) {
-    if (this.textures.exists(key)) { done(); return; }
-    this.load.image(key, url);
-    this.load.once(`filecomplete-image-${key}`, done);
-    if (!this.load.isLoading()) this.load.start();
-  }
-
-  // Visible pixel box of a sprite, so feet rest on the ground whatever the padding in the file.
-  pixelBounds(key) {
-    if (this.bounds.has(key)) return this.bounds.get(key);
-    const src = this.textures.get(key).getSourceImage(), w = src.width, h = src.height;
-    let box = { left: 0, right: w - 1, top: 0, bottom: h - 1, width: w, height: h };
-    try {
-      const c = document.createElement('canvas'); c.width = w; c.height = h;
-      const ctx = c.getContext('2d'); ctx.drawImage(src, 0, 0);
-      const data = ctx.getImageData(0, 0, w, h).data;
-      let left = w, right = -1, top = -1, bottom = -1;
-      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (data[(y * w + x) * 4 + 3] > 16) { if (x < left) left = x; if (x > right) right = x; if (top < 0) top = y; bottom = y; }
-      if (right >= 0) box = { left, right, top, bottom, width: w, height: h };
-    } catch { /* unreadable image: keep the full box */ }
-    this.bounds.set(key, box);
-    return box;
-  }
+  ensureTexture(key, url, done) { ensureTexture(this, key, url, done); }
+  pixelBounds(key) { return pixelBounds(this, key); }
 };
