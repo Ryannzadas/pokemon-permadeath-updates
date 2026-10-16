@@ -30,7 +30,7 @@ const htmlWindowOpen = () => !!document.querySelector('.profile-panel,.game-conf
 // explicitly (window.FORCE_GAME_ENGINE) when testing it. Players always get the engine.
 const enabled = !navigator.webdriver || window.FORCE_GAME_ENGINE === true;
 
-const engine = { input: new InputManager(), game: null, active: null, ready: false, window: null };
+const engine = { input: new InputManager(), game: null, active: null, ready: false, window: null, renderScale: 1 };
 
 // Game windows (settings, collection) open over the title or the journey and return there.
 function ownedScene() {
@@ -68,9 +68,20 @@ function route() {
   showStage(engine.host, !!key);
 }
 
+// The world is 480x270, but it is drawn at the screen's real resolution (render scale R): every
+// camera zooms by R and text is rasterized at R, so small letters stay sharp at any window size.
+// Exactly the device pixels the game occupies, so nothing is resampled after drawing.
+function renderScale() { return Math.max(1, Math.min(8, fitZoom() * (window.devicePixelRatio || 1))); }
 function resize() {
   if (!engine.game) return;
-  engine.game.scale.setZoom(fitZoom());
+  const R = renderScale();
+  if (Math.abs(R - engine.renderScale) > 0.001) {
+    engine.renderScale = R;
+    engine.game.registry.set('renderScale', R);
+    engine.game.scale.resize(Math.round(WIDTH * R), Math.round(HEIGHT * R));
+    engine.game.scene.getScenes(false).forEach(scene => { scene.cameras?.main?.setZoom(R).centerOn(WIDTH / 2, HEIGHT / 2); scene.events.emit('rescale'); });
+  }
+  engine.game.scale.setZoom(1 / (window.devicePixelRatio || 1));
 }
 
 async function boot() {
@@ -80,13 +91,21 @@ async function boot() {
   // Text is drawn on canvas, so the pixel font must be loaded before the first scene.
   try { await document.fonts.load(`10px "${FONT}"`); } catch { /* fall back to monospace */ }
   engine.game = new Phaser.Game({
-    type: Phaser.AUTO, parent: engine.host, width: WIDTH, height: HEIGHT, pixelArt: true, roundPixels: true,
+    type: Phaser.AUTO, parent: engine.host, pixelArt: true, roundPixels: false,
     backgroundColor: '#101418', banner: false, audio: { noAudio: true },
     // The game's content policy blocks XHR (connect-src 'none'); images load as <img> instead.
     loader: { imageLoadType: 'HTMLImageElement' },
-    scale: { mode: Phaser.Scale.NONE, zoom: fitZoom() },
+    width: Math.round(WIDTH * renderScale()), height: Math.round(HEIGHT * renderScale()),
+    scale: { mode: Phaser.Scale.NONE, zoom: 1 / (window.devicePixelRatio || 1) },
     scene: [new (defineBattleScene())(engine), ...[defineMenuScenes, defineJourneyScenes, definePanelScenes].flatMap(define => Object.values(define(engine)).map(Scene => new Scene()))],
   });
+  engine.renderScale = renderScale();
+  engine.game.registry.set('renderScale', engine.renderScale);
+  // Every scene draws the 480x270 world through a camera zoomed to the render scale.
+  engine.game.events.on('step', () => engine.game.scene.getScenes(true).forEach(scene => {
+    const cam = scene.cameras.main;
+    if (cam.zoom !== engine.renderScale) cam.setZoom(engine.renderScale).centerOn(WIDTH / 2, HEIGHT / 2);
+  }));
   engine.game.events.once('ready', () => {
     engine.game.scene.getScenes(false).forEach(scene => engine.game.scene.stop(scene.sys.settings.key));
     engine.ready = true;

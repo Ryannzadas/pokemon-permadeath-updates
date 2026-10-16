@@ -5,7 +5,7 @@
 import { WIDTH, HEIGHT, TEXT, COLORS, hpColor } from '../config.js';
 import { pixelText, drawWindow, Menu, Typewriter } from '../ui.js';
 import { command, engineOptions } from '../bridge.js';
-import { ensureTexture, addSpecies } from '../assets.js';
+import { ensureTexture, addSpecies, addIcon } from '../assets.js';
 import { defineScreenScene, iconScale, money } from './screen-base.js';
 
 const GOLD = '#e3bd69';
@@ -39,7 +39,7 @@ export function defineJourneyScenes(engine) {
       R.team.slice(0, 6).forEach((m, i) => {
         const x = 12 + (i % 2) * 148, y = 82 + Math.floor(i / 2) * 42, dead = m.hp <= 0, c = this.add.container(0, 0); this.root.add(c);
         c.add(this.add.graphics().fillStyle(dead ? 0xd8d8d0 : 0xffffff, 1).fillRoundedRect(x, y, 142, 38, 4).lineStyle(1, i === R.active ? COLORS.messageBorder : 0xa8b0c0, 1).strokeRoundedRect(x, y, 142, 38, 4));
-        addSpecies(this, c, m.sp, x + 18, y + 34, { scale: iconScale(m.sp) }).setAlpha(dead ? 0.4 : 1);
+        addIcon(this, c, m.sp, x + 18, y + 34, iconScale(m.sp)).setAlpha(dead ? 0.4 : 1);
         c.add(pixelText(this, x + 36, y + 3, nm(m), { size: TEXT.large, color: dead ? COLORS.disabled : COLORS.ink })); // the orange border marks the lead
         c.add(pixelText(this, x + 136, y + 6, `Nv${m.lvl}`, { size: TEXT.body, color: dead ? COLORS.disabled : COLORS.ink }).setOrigin(1, 0));
         this.hpBar(c, x + 36, y + 25, 64, m);

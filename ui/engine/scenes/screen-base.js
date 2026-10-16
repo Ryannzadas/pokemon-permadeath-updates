@@ -15,6 +15,7 @@ export function defineScreenScene(engine) {
       this.key = '';
       this.events.on('wake', () => { this.key = ''; this.cameras.main.fadeIn(160, 16, 20, 24); this.sync(); });
       this.events.on('sleep', () => { this.teardown(); this.key = ''; });
+      this.events.on('rescale', () => { this.key = ''; this.sync(); });
       this.cameras.main.fadeIn(160, 16, 20, 24);
       this.sync();
     }

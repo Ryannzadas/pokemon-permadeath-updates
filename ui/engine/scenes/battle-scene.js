@@ -37,6 +37,8 @@ export const defineBattleScene = () => class BattleScene extends Phaser.Scene {
     this.layerUi = this.add.container(0, 0);
     this.layerOverlay = this.add.container(0, 0);
     this.events.on('wake', () => this.sync());
+    // A new render scale redraws texts at the new resolution.
+    this.events.on('rescale', () => { this.uiKey = ''; for (const m of this.mons.values()) m.boxKey = ''; this.sync(); });
     this.sync();
   }
 

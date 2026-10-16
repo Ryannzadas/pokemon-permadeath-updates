@@ -7,7 +7,8 @@ export function pixelText(scene, x, y, text, { size = TEXT.body, color = COLORS.
     fontFamily: `"${FONT}", monospace`, fontSize: `${size}px`, color, align,
     wordWrap: width ? { width, useAdvancedWrap: true } : undefined,
   });
-  t.setResolution(1);
+  // Rasterize at the render scale so the pixel font stays sharp when the world is drawn larger.
+  t.setResolution(scene.game.registry.get('renderScale') || 1);
   if (shadow) t.setShadow(1, 1, shadow, 0, false, true);
   return t;
 }

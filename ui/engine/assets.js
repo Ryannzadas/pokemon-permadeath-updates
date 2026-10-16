@@ -50,3 +50,13 @@ export function addSpecies(scene, container, sp, x, ground, { back = false, room
   });
   return img;
 }
+
+// Menu icon (Gen VII, 40x30) for party lists; falls back to a shrunken battle sprite.
+export function addIcon(scene, container, sp, x, ground, fallbackScale = 0.5) {
+  const dex = SP[sp]?.dex;
+  if (!window.POKEMON_ICONS?.has(dex)) return addSpecies(scene, container, sp, x, ground, { scale: fallbackScale });
+  const key = `icon:${dex}`, img = scene.add.image(x, ground, '__DEFAULT').setOrigin(0.5, 1).setVisible(false);
+  container?.add(img);
+  ensureTexture(scene, key, `assets/icons/${dex}.png`, () => { if (img.active) img.setTexture(key).setVisible(true); });
+  return img;
+}
