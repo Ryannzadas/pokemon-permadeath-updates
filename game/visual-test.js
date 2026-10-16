@@ -23,7 +23,7 @@ rHub=()=>{
  const original=oldHub();if(S.shop)return original;
  if(hubPanel==='collection')return collection();
  if(hubPanel==='team')return `<section class="panel"><h2>Equipe</h2><div class="grid visual-team-full">${R.team.map(teamCard).join('')}</div></section>`;
- if(hubPanel==='bag'){const bag=original.match(/<section class="panel"><h2>Mochila<\/h2>[\s\S]*?<\/section>/)?.[0]||'<section class="panel"><h2>Mochila</h2><p>Mochila vazia.</p></section>';return `<div class="visual-bag">${bag}</div>${S.sel?`<section class="panel"><h3>Escolha um Pokémon</h3><div class="grid">${R.team.map(teamCard).join('')}</div></section>`:''}`;}
+ if(hubPanel==='bag'){const bag=original.match(/<section class="panel"><h2>Mochila<\/h2>[\s\S]*?<\/section>/)?.[0]||'<section class="panel"><h2>Mochila</h2><p>Mochila vazia.</p></section>';return `<div class="visual-bag">${window.BagView?BagView.html(bag):bag}${S.sel?`<section class="panel bag-target"><h3>Usar ${esc(ITEMS[S.sel]?.n||'item')} em qual Pokémon?</h3><div class="grid">${R.team.map(teamCard).join('')}</div></section>`:''}</div>`;}
 
  const boss=nextIsBoss(),next=nextBoss(),portrait=(CAMP_ASSETS.trainers.find(t=>t.id===R.trainer)||CAMP_ASSETS.trainers[0]).portrait;
  const buttons=b('go',boss?'⚔ Desafiar ginásio':'⚔ Batalhar','','gold')+b('routes','▧ Explorar')+b('camp','⌂ Acampamento');

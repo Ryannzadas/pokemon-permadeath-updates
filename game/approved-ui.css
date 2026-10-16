@@ -81,3 +81,17 @@ body.react-interface.react-battle-active .wrap{padding:24px 32px!important}.reac
 /* The header back button is the persistent one; hide duplicate in-panel back buttons. */
 .react-interface .journal-heading>[data-act=subBack],.react-interface .journal-heading>[data-act=journalBack]{display:none}
 .react-interface .journal-heading:not(:has(>:not([data-act=subBack]):not([data-act=journalBack]))){display:none}
+/* Bag: category tabs and item cards built by bag-view.js. */
+.react-interface .bag-head{display:flex;align-items:baseline;gap:12px;margin-bottom:18px}.react-interface .bag-head h2{margin:0}.react-interface .bag-head small{color:var(--r-muted);font-size:14px}
+.react-interface .bag-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 20px}.react-interface .bag-tabs>.btn{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:8px 14px;font-size:14px}.react-interface .bag-tabs>.btn span{min-width:22px;padding:1px 7px;border-radius:999px;background:#0000000f;font-size:12px;font-weight:700}.react-interface .bag-tabs>.btn[aria-pressed=true] span{background:#ffffff2e}
+.react-interface .bag-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.react-interface .bag-item{display:grid;grid-template-columns:56px minmax(0,1fr) auto;grid-template-areas:"art info qty" "art action action";align-items:center;column-gap:14px;row-gap:8px;padding:14px 16px;border-radius:14px;background:var(--game-soft);border:1px solid transparent}
+.react-interface .bag-item.selected{border-color:var(--r-gold);box-shadow:0 0 0 2px var(--r-gold) inset}
+.react-interface .bag-item-art{grid-area:art;width:56px;height:56px;display:grid;place-items:center;border-radius:12px;background:var(--r-white)}.react-interface .bag-item-art img{width:40px;height:40px;object-fit:contain;image-rendering:pixelated}
+.react-interface .bag-item-info{grid-area:info;min-width:0;display:flex;flex-direction:column;gap:2px}.react-interface .bag-item-info strong{font-size:15px;overflow-wrap:anywhere}.react-interface .bag-item-info small{color:var(--r-muted);font-size:12.5px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.react-interface .bag-item-qty{grid-area:qty;align-self:start;font-weight:800;font-size:15px;color:var(--r-text)}
+.react-interface .bag-item-use{grid-area:action;justify-self:start;min-height:36px;padding:6px 18px;font-size:13px}.react-interface .bag-item-hint{grid-area:action;color:var(--r-muted);font-size:12px}
+.react-interface .bag-empty{display:flex;flex-direction:column;align-items:center;gap:12px;padding:32px 16px;color:var(--r-muted)}
+.react-interface .bag-target h3{margin-top:0}
+@media(max-width:700px){.react-interface .bag-grid{grid-template-columns:1fr}}
+.react-interface .bag-item-use.alt{background:var(--r-white);border:1px solid var(--r-line)!important}
