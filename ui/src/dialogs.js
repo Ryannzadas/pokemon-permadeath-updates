@@ -12,7 +12,8 @@ export function installDialogs(){
    const cancel=document.createElement('button');cancel.className='btn gold';cancel.textContent=cancelLabel;cancel.dataset.dialog='cancel';
    const confirm=document.createElement('button');confirm.className='btn alt';confirm.textContent=confirmLabel;confirm.dataset.dialog='confirm';
    function close(result){document.removeEventListener('keydown',key,true);shade.remove();$app.inert=oldInert;open=null;previous?.isConnected&&previous.focus({preventScroll:true});resolve(result);}
-   function key(event){if(event.key==='Escape'){event.stopImmediatePropagation();event.preventDefault();close(false);}else if(event.key==='Tab'){const first=cancel,last=confirm;if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}}}
+   // Game controls too: arrows choose, Z confirms the focused choice, X cancels.
+   function key(event){if(['ArrowUp','ArrowDown'].includes(event.key)){event.stopImmediatePropagation();event.preventDefault();(document.activeElement===cancel?confirm:cancel).focus();return;}if(event.key==='z'||event.key==='Z'){event.stopImmediatePropagation();event.preventDefault();document.activeElement?.click();return;}if(event.key==='Escape'||event.key==='x'||event.key==='X'){event.stopImmediatePropagation();event.preventDefault();close(false);}else if(event.key==='Tab'){const first=cancel,last=confirm;if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}}}
    cancel.onclick=()=>close(false);confirm.onclick=()=>close(true);shade.onclick=e=>{if(e.target===shade)close(false)};
    panel.append(kicker,heading,text,cancel,confirm);shade.append(panel);document.body.append(shade);$app.inert=true;document.addEventListener('keydown',key,true);open=shade;cancel.focus();
   });

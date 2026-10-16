@@ -48,7 +48,7 @@ export class Menu {
     if (this.offset + this.rows < totalRows) this.container.add(pixelText(this.scene, this.x + this.columns * this.cellW - 12, this.y + this.rows * this.cellH - 2, '▼', { size: TEXT.body }));
     this.items.forEach((item, i) => {
       if (!this.visible(i)) return;
-      const { cx, cy } = this.cellPos(i), focused = i === this.index;
+      const { cx, cy } = this.cellPos(i), focused = i === this.index && this.focused !== false;
       if (this.drawCell) this.drawCell(this.container, item, cx, cy, focused);
       else {
         if (focused && !item.disabled) {
@@ -88,6 +88,10 @@ export class Menu {
   }
 
   select() { const item = this.items[this.index]; if (item && !item.disabled) item.onSelect?.(item); }
+
+  // Several menus on one screen: only the focused one takes input.
+  blur() { this.release?.(); this.release = null; this.focused = false; this.render(); }
+  takeFocus() { if (!this.release) this.release = this.input.push(action => this.handle(action)); this.focused = true; this.render(); }
 
   destroy() { this.release?.(); this.container.destroy(true); }
 }

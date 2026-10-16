@@ -1,14 +1,25 @@
 // Image loading and sprite measurement shared by every scene.
 
 // Loads an image once per game (textures are shared between scenes) and calls done when ready.
-const pending = new Set();
-export function ensureTexture(scene, key, url, done) {
+// Textures are shared by every scene, but each scene has its own loader. A file is queued once, in
+// whichever scene asked first, and every caller (from any scene) is told when it is ready.
+// Files load through an always-running loader scene: a scene that goes to sleep pauses its own
+// loader, which would leave images requested just before a screen change waiting forever.
+const waiting = new Map();
+function loader(scene) { const s = scene.game.scene.getScene('assets-loader'); return s?.sys.isActive() ? s : scene; }
+function loadOnce(scene, key, kind, queue, done) {
   if (scene.textures.exists(key)) { done(); return; }
-  scene.load.once(`filecomplete-image-${key}`, done);
-  // Several pieces of a screen may ask for the same image at once: queue it only once.
-  if (!pending.has(key)) { pending.add(key); scene.load.image(key, url); scene.load.once(`filecomplete-image-${key}`, () => pending.delete(key)); }
-  if (!scene.load.isLoading()) scene.load.start();
+  if (waiting.has(key)) { waiting.get(key).push(done); return; }
+  waiting.set(key, [done]);
+  const host = loader(scene);
+  host.load.once(`filecomplete-${kind}-${key}`, () => { const callbacks = waiting.get(key) || []; waiting.delete(key); callbacks.forEach(cb => cb()); });
+  queue(host.load);
+  if (!host.load.isLoading()) host.load.start();
 }
+export function ensureTexture(scene, key, url, done) { loadOnce(scene, key, 'image', load => load.image(key, url), done); }
+export function ensureSheet(scene, key, url, frame, done) { loadOnce(scene, key, 'spritesheet', load => load.spritesheet(key, url, frame), done); }
+
+export const defineLoaderScene = () => class AssetsLoaderScene extends Phaser.Scene { constructor() { super({ key: 'assets-loader', active: true }); } };
 
 const bounds = new Map();
 // Visible pixel box of a sprite, so Pokémon rest on the ground whatever the padding in the file.
@@ -71,8 +82,7 @@ export function addWalker(scene, container, trainerId, x, ground, scale = 1.5) {
     if (!scene.anims.exists(key)) scene.anims.create({ key, frames: scene.anims.generateFrameNumbers(key, { start: 0, end: 3 }), frameRate: 6, repeat: -1 });
     sprite.setTexture(key, 0).setScale(scale).setVisible(true).play(key);
   };
-  if (scene.textures.exists(key)) start();
-  else { scene.load.spritesheet(key, t.sheet, { frameWidth: 32, frameHeight: 48 }); scene.load.once(`filecomplete-spritesheet-${key}`, start); if (!scene.load.isLoading()) scene.load.start(); }
+  ensureSheet(scene, key, t.sheet, { frameWidth: 32, frameHeight: 48 }, start);
   return sprite;
 }
 
@@ -93,7 +103,6 @@ export function addTrainer(scene, container, sprite, x, y, { scale = 1, originY 
     if (!scene.anims.exists(key)) scene.anims.create({ key, repeat: -1, frames: info.delays.map((duration, frame) => ({ key, frame, duration })) });
     img.setTexture(key, 0).setScale(scale).setVisible(true).play(key);
   };
-  if (scene.textures.exists(key)) start();
-  else { scene.load.spritesheet(key, `assets/trainers/sheets/${sprite}.png`, { frameWidth: info.width, frameHeight: info.height }); scene.load.once(`filecomplete-spritesheet-${key}`, start); if (!scene.load.isLoading()) scene.load.start(); }
+  ensureSheet(scene, key, `assets/trainers/sheets/${sprite}.png`, { frameWidth: info.width, frameHeight: info.height }, start);
   return img;
 }

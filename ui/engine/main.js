@@ -5,9 +5,12 @@ import { createStage, fitZoom, showStage } from './stage.js';
 import { InputManager } from './input.js';
 import { installRenderHook, onStateChange } from './bridge.js';
 import { defineBattleScene } from './scenes/battle-scene.js';
+import { defineLoaderScene } from './assets.js';
 import { defineMenuScenes } from './scenes/menu-scenes.js';
 import { defineJourneyScenes } from './scenes/journey-scenes.js';
 import { definePanelScenes } from './scenes/panel-scenes.js';
+import { defineCollectionScenes } from './scenes/collection-scenes.js';
+import { definePartyScenes } from './scenes/party-scenes.js';
 
 // Which scene owns a screen. Screens not listed keep the previous interface for now.
 const titlePanel = () => document.body.dataset.visualPanel || '';
@@ -22,9 +25,15 @@ const SCENES = {
   hub: () => S.screen === 'hub' && !!R && !S.shop && !titlePanel(),
   intro: () => S.screen === 'intro' && !!B?.trainer,
   result: () => ['reward', 'gameover', 'win'].includes(S.screen) && !!R,
+  dex: () => S.screen === 'dex',
+  journal: () => S.screen === 'journal',
+  team: () => S.screen === 'hub' && !!R && !S.shop && titlePanel() === 'team',
 };
-// HTML windows that sit over the game (profile, confirmations, evolution) take the screen while open.
-const htmlWindowOpen = () => !!document.querySelector('.profile-panel,.game-confirm-overlay') || (typeof EVOLVING !== 'undefined' && EVOLVING) || !!window.journeyModalOpen;
+// Profile and Trainer Card are still full HTML screens: they take the screen while open.
+const htmlWindowOpen = () => !!document.querySelector('.profile-panel') || !!window.journeyModalOpen;
+// Confirmations and the evolution sequence are game-styled windows drawn over the scene: the game
+// stays on screen and the keyboard goes to the window until it closes.
+const overlayOpen = () => !!document.querySelector('.game-confirm-overlay,.evo') || (typeof EVOLVING !== 'undefined' && EVOLVING);
 
 // Automated UI tests drive the previous interface by clicking HTML; they enable the engine
 // explicitly (window.FORCE_GAME_ENGINE) when testing it. Players always get the engine.
@@ -55,11 +64,12 @@ addEventListener('keydown', event => { if (event.key === 'F11') { event.preventD
 
 function route() {
   const key = ownedScene();
+  engine.input.enabled = !!key && !overlayOpen();
   if (key === engine.active) return;
   const previous = engine.active;
   engine.active = key;
   engine.input.clear();
-  engine.input.enabled = !!key;
+  engine.input.enabled = !!key && !overlayOpen();
   if (previous) engine.game.scene.sleep(previous);
   if (key) {
     const manager = engine.game.scene;
@@ -73,6 +83,8 @@ function route() {
 // Exactly the device pixels the game occupies, so nothing is resampled after drawing.
 function renderScale() { return Math.max(1, Math.min(8, fitZoom() * (window.devicePixelRatio || 1))); }
 function resize() {
+  // HTML windows over the game size themselves in game units: 1u = --gz CSS pixels.
+  document.documentElement.style.setProperty('--gz', String(fitZoom()));
   if (!engine.game) return;
   const R = renderScale();
   if (Math.abs(R - engine.renderScale) > 0.001) {
@@ -97,7 +109,7 @@ async function boot() {
     loader: { imageLoadType: 'HTMLImageElement' },
     width: Math.round(WIDTH * renderScale()), height: Math.round(HEIGHT * renderScale()),
     scale: { mode: Phaser.Scale.NONE, zoom: 1 / (window.devicePixelRatio || 1) },
-    scene: [new (defineBattleScene())(engine), ...[defineMenuScenes, defineJourneyScenes, definePanelScenes].flatMap(define => Object.values(define(engine)).map(Scene => new Scene()))],
+    scene: [new (defineLoaderScene())(), new (defineBattleScene())(engine), ...[defineMenuScenes, defineJourneyScenes, definePanelScenes, defineCollectionScenes, definePartyScenes].flatMap(define => Object.values(define(engine)).map(Scene => new Scene()))],
   });
   engine.renderScale = renderScale();
   engine.game.registry.set('renderScale', engine.renderScale);
@@ -107,11 +119,12 @@ async function boot() {
     if (cam.zoom !== engine.renderScale) cam.setZoom(engine.renderScale).centerOn(WIDTH / 2, HEIGHT / 2);
   }));
   engine.game.events.once('ready', () => {
-    engine.game.scene.getScenes(false).forEach(scene => engine.game.scene.stop(scene.sys.settings.key));
+    engine.game.scene.getScenes(false).forEach(scene => { if (scene.sys.settings.key !== 'assets-loader') engine.game.scene.stop(scene.sys.settings.key); });
     engine.ready = true;
     route();
   });
   addEventListener('resize', resize);
+  resize();
   if (CFG.fullscreen) engine.setFullScreen(true);
   // HTML windows can open or close without a game render; keep the owner in sync.
   setInterval(route, 250);
