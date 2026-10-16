@@ -6,6 +6,8 @@ export function battleNavigation(){
  if(S.screen!=='battle'||!B)return null;
  return fireRedActive()?[]:commandItems();
 }
+// Shared with the Phaser battle scene so the command rules live in one place.
+window.battleCommandItems=()=>S.screen==='battle'&&B?commandItems():[];
 function commandItems(){
  const locked=B.lock||B.forced||B.menu==='target';
  const item=(icon,label,action,value,disabled=false)=>({icon,label,action,value,disabled:!!(locked||disabled),selected:action==='menu'&&B.menu===value});

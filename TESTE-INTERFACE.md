@@ -1,6 +1,15 @@
 # Pokémon Permadeath — teste das telas aprovadas
 
-Versão **0.4.1-test.8**.
+Versão **0.4.1-test.9**.
+
+## Novidades da test.9
+
+- As batalhas da jornada (selvagem, treinador, ginásio, treino, exploração e duplas) agora rodam no motor de jogo Phaser, em tela cheia 16:9 com pixel art em escala inteira. A interface de site some durante a batalha.
+- Teclado e controle: setas/WASD movem, Z/Enter confirmam, X/Esc voltam; no controle, A confirma e B volta.
+- Mochila e troca de Pokémon na batalha com cartões, sprites, barras de HP e ícones.
+- Batalhas online continuam na versão estilo FireRed em HTML até a fase 5 (veja docs/MOTOR-DE-JOGO.md).
+
+## test.8
 
 ## Novidades da test.8
 

@@ -5,7 +5,9 @@ const SCENE_W=360,SCENE_H=240;
 const FR={key:null,actor:null,fight:false,moveIndex:0,lastMsg:'',typing:0};
 
 const arenaOf=()=>$app.querySelector('.battle-classic,.handheld-arena');
-export const fireRedActive=()=>S.screen==='battle'&&!!B||S.screen==='multiplayer'&&!!arenaOf();
+// Journey battles are drawn by the Phaser engine when it claims the screen; this HTML version
+// remains for online battles until they migrate.
+export const fireRedActive=()=>!window.GameEngine?.claims()&&(S.screen==='battle'&&!!B||S.screen==='multiplayer'&&!!arenaOf());
 
 const el=(tag,cls,html='')=>{const n=document.createElement(tag);if(cls)n.className=cls;if(html)n.innerHTML=html;return n;};
 const effLabel={'super efetivo':'Super efetivo','pouco efetivo':'Pouco efetivo','sem efeito':'Sem efeito'};

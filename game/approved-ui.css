@@ -95,3 +95,5 @@ body.react-interface.react-battle-active .wrap{padding:24px 32px!important}.reac
 .react-interface .bag-target h3{margin-top:0}
 @media(max-width:700px){.react-interface .bag-grid{grid-template-columns:1fr}}
 .react-interface .bag-item-use.alt{background:var(--r-white);border:1px solid var(--r-line)!important}
+/* While a Phaser scene draws the screen, the web interface underneath is fully hidden. */
+body.game-stage-active :is(.react-header,.react-sidebar,.react-mobile-nav,#app,#game-toolbar,.toast-region,.profile-toggle,.profile-dock,.save-indicator,.desktop-account){visibility:hidden!important}
