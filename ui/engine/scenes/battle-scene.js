@@ -88,8 +88,9 @@ export const defineBattleScene = () => class BattleScene extends Phaser.Scene {
   spriteInfo(mon, back) {
     const dex = SP[mon.sp]?.dex;
     if (window.FRLG_SPRITES?.[dex]) return { key: `frlg:${dex}-${back ? 'b' : 'f'}`, url: `assets/sprites-frlg/${dex}-${back ? 'b' : 'f'}.png`, scale: 2 };
+    // Regular (DS-era) sprites are doubled when the Pokémon fits, so sizes match the FireRed ones.
     const url = SPRITE(dex, back);
-    return { key: `spr:${url}`, url, scale: 1 };
+    return { key: `spr:${url}`, url, scale: 'fit' };
   }
 
   createMon(side, mon, slot, layout) {
@@ -100,7 +101,9 @@ export const defineBattleScene = () => class BattleScene extends Phaser.Scene {
     this.ensureTexture(info.key, info.url, () => {
       if (!sprite.active) return;
       const b = this.pixelBounds(info.key);
-      sprite.setTexture(info.key).setScale(info.scale).setVisible(true);
+      const room = side === 'enemy' ? spot.ground - 6 : ARENA_H - 50;
+      const scale = info.scale === 'fit' ? ((b.bottom - b.top + 1) * 2 <= room ? 2 : 1) : info.scale;
+      sprite.setTexture(info.key).setScale(scale).setVisible(true);
       // Rest the visible feet on the ground and center the visible body on the spot.
       sprite.setOrigin((b.left + b.right + 1) / 2 / b.width, (b.bottom + 1) / b.height);
       sprite.setPosition(spot.x, spot.ground);
@@ -383,14 +386,14 @@ export const defineBattleScene = () => class BattleScene extends Phaser.Scene {
   pixelBounds(key) {
     if (this.bounds.has(key)) return this.bounds.get(key);
     const src = this.textures.get(key).getSourceImage(), w = src.width, h = src.height;
-    let box = { left: 0, right: w - 1, bottom: h - 1, width: w, height: h };
+    let box = { left: 0, right: w - 1, top: 0, bottom: h - 1, width: w, height: h };
     try {
       const c = document.createElement('canvas'); c.width = w; c.height = h;
       const ctx = c.getContext('2d'); ctx.drawImage(src, 0, 0);
       const data = ctx.getImageData(0, 0, w, h).data;
-      let left = w, right = -1, bottom = -1;
-      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (data[(y * w + x) * 4 + 3] > 16) { if (x < left) left = x; if (x > right) right = x; bottom = y; }
-      if (right >= 0) box = { left, right, bottom, width: w, height: h };
+      let left = w, right = -1, top = -1, bottom = -1;
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (data[(y * w + x) * 4 + 3] > 16) { if (x < left) left = x; if (x > right) right = x; if (top < 0) top = y; bottom = y; }
+      if (right >= 0) box = { left, right, top, bottom, width: w, height: h };
     } catch { /* unreadable image: keep the full box */ }
     this.bounds.set(key, box);
     return box;
