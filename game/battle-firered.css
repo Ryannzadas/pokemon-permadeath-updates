@@ -1,0 +1,82 @@
+/* FireRed-style single battles. The scene is a 360x240 grid (GBA 240x160 at 1.5x, so 96px
+   sprites keep FireRed proportions) scaled by --u. All lengths below are in scene units. */
+.react-interface .react-battle-stage.fr-battle{--u:2px;--fp:3px;--fps:2px;display:flex!important;justify-content:center;align-items:flex-start;height:auto!important;min-height:0!important;grid-template:none!important;gap:0!important}
+.fr-frame{position:relative;width:calc(var(--u)*360);height:calc(var(--u)*240);flex:none;overflow:hidden;border-radius:calc(var(--u)*6);box-shadow:0 0 0 calc(var(--u)*2) #2a2f36,0 calc(var(--u)*4) calc(var(--u)*16) #0000004d;font-family:'Jersey 10','Silkscreen',monospace;-webkit-font-smoothing:none;user-select:none;--hp-hi:#58d080;--hp-mid:#f8c038;--hp-lo:#f85838}
+
+/* Trainer and remaining count shown above the scene. */
+.react-interface p:has(+ .react-battle-stage.fr-battle){display:block!important;width:100%;margin:0 0 8px!important;text-align:center;font:400 20px/1.2 'Jersey 10',monospace!important;color:var(--r-text)}
+
+/* Arena */
+.fr-battle .fr-frame>.arena.battle-classic{position:absolute!important;inset:0 0 auto 0!important;width:100%!important;height:calc(var(--u)*168)!important;max-height:none!important;min-height:0!important;aspect-ratio:auto!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;container-type:normal!important;background-size:cover!important;background-position:center 62%!important}
+.fr-battle .battle-mon{position:absolute!important;max-width:none!important;max-height:none!important;width:calc(var(--u)*96)!important;height:calc(var(--u)*96)!important;z-index:2}
+.fr-battle .battle-mon.enemy-mon{left:calc(var(--u)*222)!important;right:auto!important;top:calc(var(--u)*14)!important;bottom:auto!important}
+.fr-battle .battle-mon.player-mon{left:calc(var(--u)*40)!important;right:auto!important;top:auto!important;bottom:0!important;width:calc(var(--u)*112)!important;height:calc(var(--u)*112)!important}
+.fr-battle .battle-mon .art.big{width:100%!important;height:100%!important;aspect-ratio:auto!important}
+.fr-battle .battle-mon .art.big img{image-rendering:pixelated}
+.fr-battle .battle-platform{display:block!important;position:absolute;border:0!important;box-shadow:none!important;border-radius:50%;background:radial-gradient(ellipse at center,#0000002e 0 55%,transparent 70%)!important;z-index:1}
+.fr-battle .enemy-platform{left:calc(var(--u)*206)!important;top:calc(var(--u)*86)!important;width:calc(var(--u)*128)!important;height:calc(var(--u)*30)!important;right:auto!important;bottom:auto!important}
+.fr-battle .player-platform{left:calc(var(--u)*18)!important;top:calc(var(--u)*150)!important;width:calc(var(--u)*156)!important;height:calc(var(--u)*30)!important;right:auto!important;bottom:auto!important}
+
+/* Status boxes */
+.react-interface .fr-battle .battle-status{position:absolute!important;z-index:3;min-width:0!important;max-width:none!important;box-sizing:border-box;padding:calc(var(--u)*4) calc(var(--u)*7) calc(var(--u)*5)!important;background:#f8f8e0!important;color:#303030!important;border:calc(var(--u)*2) solid #405040!important;border-radius:calc(var(--u)*7) calc(var(--u)*2) calc(var(--u)*7) calc(var(--u)*2)!important;box-shadow:calc(var(--u)*3) calc(var(--u)*3) 0 #40504066!important;font-family:'Jersey 10',monospace!important}
+.react-interface .fr-battle .enemy-status{left:calc(var(--u)*16)!important;top:calc(var(--u)*18)!important;right:auto!important;bottom:auto!important;width:calc(var(--u)*152)!important}
+.react-interface .fr-battle .player-status{left:calc(var(--u)*190)!important;top:auto!important;right:auto!important;bottom:calc(var(--u)*5)!important;width:calc(var(--u)*158)!important}
+.react-interface .fr-battle .battle-status .nm{display:flex;justify-content:space-between;gap:calc(var(--u)*4);margin:0!important;font:400 calc(var(--fp)*10)/1 'Jersey 10',monospace!important;letter-spacing:0;color:#303030;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fr-battle .battle-status .battle-types{display:none!important}
+.react-interface .fr-battle .battle-status .hp{position:relative;height:calc(var(--u)*6)!important;margin:calc(var(--u)*4) 0 0 calc(var(--u)*24)!important;background:#506058!important;border:calc(var(--u)*1.5) solid #384838!important;border-radius:calc(var(--u)*3)!important;overflow:visible}
+.fr-battle .battle-status .hp::before{content:'HP';position:absolute;right:100%;top:50%;transform:translateY(-50%);margin-right:calc(var(--u)*3);padding:0 calc(var(--u)*2);font:400 calc(var(--fps)*10)/1.3 'Jersey 10',monospace;color:#f8d040;background:#405040;border-radius:calc(var(--u)*2)}
+.fr-battle .battle-status .hp>i{height:100%;border:0!important;border-radius:calc(var(--u)*2)}
+.react-interface .fr-battle .battle-status .battle-hp{margin:calc(var(--u)*2) 0 0!important;text-align:right;font:400 calc(var(--fps)*10)/1 'Jersey 10',monospace!important;color:#303030!important}
+.fr-exp{display:flex;align-items:center;gap:calc(var(--u)*3);margin-top:calc(var(--u)*3)}
+.fr-exp>span{font:400 calc(var(--fps)*10)/1 'Jersey 10',monospace;color:#405040}
+.fr-exp .xp{flex:1;height:calc(var(--u)*3);margin:0;background:#506058;border-radius:calc(var(--u)*1);overflow:hidden}
+.fr-exp .xp>i{display:block;height:100%;background:#48a8f8}
+
+/* Text box */
+.fr-textbox{position:absolute;left:0;right:0;bottom:0;height:calc(var(--u)*72);display:flex;background:#283848;border-top:calc(var(--u)*2) solid #182028}
+.fr-message{flex:0 0 calc(var(--u)*176);box-sizing:border-box;margin:calc(var(--u)*4);padding:calc(var(--u)*7) calc(var(--u)*10);border:calc(var(--u)*2.5) solid #d8683c;border-radius:calc(var(--u)*5);background:#304860;box-shadow:inset 0 0 0 calc(var(--u)*1.5) #f0c8a0}
+.fr-message.is-wide{flex:1}
+.fr-message p{margin:0;color:#fff;font:400 calc(var(--fp)*10)/1.4 'Jersey 10',monospace;text-shadow:calc(var(--u)*1) calc(var(--u)*1) 0 #50586a;white-space:pre-wrap}
+.fr-menu{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:1fr;margin:calc(var(--u)*4) calc(var(--u)*4) calc(var(--u)*4) 0;padding:calc(var(--u)*5) calc(var(--u)*6);background:#f8f8f8;border:calc(var(--u)*2.5) solid #706890;border-radius:calc(var(--u)*5);box-shadow:inset 0 0 0 calc(var(--u)*1.5) #c8c0e0}
+.fr-cmd{display:flex;align-items:center;gap:calc(var(--u)*3);padding:0 calc(var(--u)*2);background:none;border:0;color:#303030;font:400 calc(var(--fp)*10)/1 'Jersey 10',monospace;text-align:left;cursor:pointer;min-height:0;border-radius:calc(var(--u)*3)}
+.fr-cmd small{display:block;margin-top:calc(var(--u)*1);font-size:calc(var(--fps)*10);font-weight:400;color:#606878}
+.fr-cursor{visibility:hidden;width:calc(var(--u)*7);font-size:calc(var(--fps)*10);color:#303030}
+.fr-cmd:is(:hover,:focus-visible) .fr-cursor{visibility:visible}
+.fr-cmd:focus{outline:none}.fr-cmd:focus-visible{background:#e8e0f8}
+.react-interface .fr-battle .fr-cmd:disabled{color:#a8a8b0;background:none!important;cursor:default}.fr-cmd:disabled .fr-cursor{visibility:hidden}
+
+/* Moves: engine buttons keep their type color and show effectiveness. */
+.fr-moves{flex:0 0 calc(var(--u)*240);display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:calc(var(--u)*3);margin:calc(var(--u)*4);padding:calc(var(--u)*3);background:#f8f8f8;border:calc(var(--u)*2.5) solid #706890;border-radius:calc(var(--u)*5)}
+.react-interface .fr-battle .fr-move{all:unset;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;gap:calc(var(--u)*1);padding:0 calc(var(--u)*6);background:var(--move-color,#a8a878);border:calc(var(--u)*1.5) solid #0000004d;border-radius:calc(var(--u)*4);cursor:pointer;min-width:0;box-shadow:inset 0 calc(var(--u)*-2) 0 #00000026}
+.fr-move-name{font:400 calc(var(--fp)*10)/1.1 'Jersey 10',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fr-eff{font:400 calc(var(--fps)*10)/1 'Jersey 10',monospace;opacity:.95}
+.fr-eff::before{margin-right:calc(var(--u)*2)}
+.fr-eff-up::before{content:'▲'}.fr-eff-down::before{content:'▼'}.fr-eff-mid::before{content:'●'}
+.fr-ink-dark{color:#202020}.fr-ink-dark .fr-move-name{text-shadow:0 calc(var(--u)*1) 0 #ffffff59}
+.fr-ink-light{color:#fff}.fr-ink-light .fr-move-name{text-shadow:calc(var(--u)*1) calc(var(--u)*1) 0 #00000059}
+.react-interface .fr-battle .fr-move:is(:hover,:focus-visible,.is-current){outline:calc(var(--u)*2) solid #303030;outline-offset:calc(var(--u)*-1)}
+.react-interface .fr-battle .fr-move.is-disabled{filter:grayscale(.85) brightness(.9);cursor:default}
+.fr-info{flex:1;display:flex;flex-direction:column;justify-content:center;gap:0;min-height:0;overflow:hidden;margin:calc(var(--u)*4) calc(var(--u)*4) calc(var(--u)*4) 0;padding:calc(var(--u)*4) calc(var(--u)*7);background:#f8f8f8;border:calc(var(--u)*2.5) solid #706890;border-radius:calc(var(--u)*5);color:#303030}
+.react-interface .fr-battle .fr-info-row{display:flex;justify-content:space-between;margin:0;font:400 calc(var(--fp)*10)/1 'Jersey 10',monospace!important}
+.react-interface .fr-battle :is(.fr-info-power,.fr-info-note){margin:0;font:400 calc(var(--fps)*10)/1.2 'Jersey 10',monospace!important;color:#505868}
+.fr-move-empty{display:flex;align-items:center;padding:0 calc(var(--u)*6);color:#a8a8b0;font:400 calc(var(--fp)*10)/1 'Jersey 10',monospace}
+.fr-back{all:unset;align-self:flex-start;margin-top:0;font:400 calc(var(--fps)*10)/1 'Jersey 10',monospace;color:#706890;cursor:pointer}
+.fr-back:is(:hover,:focus-visible){color:#303030;text-decoration:underline}
+
+/* Bag, Poké Balls, party and targets */
+.fr-overlay{position:absolute;inset:0 0 calc(var(--u)*72) 0;display:flex;flex-direction:column;background:#f0f0e0;border-bottom:calc(var(--u)*2) solid #182028;z-index:5;font-family:'Jersey 10',monospace}
+.fr-overlay-head{display:flex;align-items:center;justify-content:space-between;gap:calc(var(--u)*6);padding:calc(var(--u)*5) calc(var(--u)*8);background:#58a8d8;color:#fff;font-size:calc(var(--fp)*10);text-shadow:calc(var(--u)*1) calc(var(--u)*1) 0 #285878}
+.fr-tabs{display:flex;gap:calc(var(--u)*3)}
+.fr-tab{all:unset;cursor:pointer;padding:calc(var(--u)*2) calc(var(--u)*6);border-radius:calc(var(--u)*4);background:#ffffff40;font:400 calc(var(--fps)*10)/1.2 'Jersey 10',monospace;color:#fff}
+.fr-tab[aria-pressed=true]{background:#fff;color:#285878;text-shadow:none}
+.fr-tab:focus-visible{outline:calc(var(--u)*1.5) solid #fff}
+.fr-overlay-body{flex:1;overflow:auto;padding:calc(var(--u)*6) calc(var(--u)*8);overscroll-behavior:contain}
+.react-interface .fr-overlay-body :is(.row,.grid){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:calc(var(--u)*4)!important;margin:0}
+.react-interface .fr-overlay-body .btn{display:flex;align-items:center;gap:calc(var(--u)*4);min-height:calc(var(--u)*22);padding:calc(var(--u)*3) calc(var(--u)*6)!important;background:#fff!important;color:#303030!important;border:calc(var(--u)*1.5) solid #a8b0c0!important;border-radius:calc(var(--u)*4)!important;font:400 calc(var(--fps)*10)/1.2 'Jersey 10',monospace!important;text-align:left;box-shadow:none!important}
+.react-interface .fr-overlay-body .btn:is(:hover,:focus-visible){border-color:#d8683c!important;outline:none}
+.react-interface .fr-overlay-body .btn:disabled{opacity:.5}
+.react-interface .fr-overlay-body .btn[data-act=menu]{grid-column:1/-1;justify-content:center;background:#e8e8f0!important}
+.fr-overlay-body .art,.fr-overlay-body .art img,.fr-overlay-body .item-sprite{width:calc(var(--u)*20)!important;height:calc(var(--u)*20)!important;image-rendering:pixelated}
+.fr-overlay-body p{margin:0 0 calc(var(--u)*4);font-size:calc(var(--fps)*10)}
+
+@media(prefers-reduced-motion:reduce){.fr-battle .hp>i{transition:none!important}}

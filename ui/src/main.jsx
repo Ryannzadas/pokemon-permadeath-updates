@@ -5,6 +5,7 @@ import {installDialogs} from './dialogs';
 import {presentScreen,captureSummary,presentCompanions,installPresentationActions} from './presentation';
 import {PokemonSummary,installSummaryActions} from './pokemon-summary';
 import {battleNavigation,layoutBattle,fitBattle} from './battle-layout';
+import {installFireRedInput} from './battle-firered';
 
 // The game remains authoritative. React owns navigation and migrated views;
 // the persistent app node keeps delegated inputs and Phaser canvases intact.
@@ -53,6 +54,7 @@ let summarySnapshot=null;
 installSummaryActions();
 installDialogs();
 installPresentationActions();
+installFireRedInput();
 function page(panel){if(S.screen==='summary')return <PokemonSummary legacy={summarySnapshot}/>;if(S.screen==='title')return panel==='options'?<Settings/>:panel==='collection'?<Collection/>:<Home/>;if(S.screen==='hub'&&!S.shop)return panel==='team'?<Team/>:panel==='collection'?<Collection/>:panel==='bag'?null:<Hub/>;if(S.screen==='modeSelect')return <ModeChoice/>;if(S.screen==='continueSelect')return <Continue/>;if(S.screen==='character')return <Character/>;return null;}
 ACT.reactTheme=()=>{CFG.theme=CFG.theme==='dark'?'light':'dark';saveCfg();};
 const nativeRender=render;

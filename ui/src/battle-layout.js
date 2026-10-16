@@ -1,7 +1,12 @@
 // The existing engine remains authoritative for actions and available targets.
+import {fireRedActive,presentFireRed,fitFireRed} from './battle-firered';
 export function battleNavigation(){
  if(S.screen==='multiplayer')return window.socialBattleNavigation?.()||[];
  if(S.screen!=='battle'||!B)return null;
+ // Single battles show these commands in the FireRed menu instead of the sidebar.
+ return fireRedActive()?[]:commandItems();
+}
+function commandItems(){
  const locked=B.lock||B.forced||B.menu==='target';
  const item=(icon,label,action,value,disabled=false)=>({icon,label,action,value,disabled:!!(locked||disabled),selected:action==='menu'&&B.menu===value});
  const list=[item('bag','Mochila','menu','bag')];
@@ -19,10 +24,12 @@ export function layoutBattle(){
  const controls=document.createElement('div');controls.className='react-battle-choices';
  while(stage.nextSibling)controls.appendChild(stage.nextSibling);
  stage.appendChild(controls);
+ if(fireRedActive()){presentFireRed(stage,commandItems());return;}
  if(log)requestAnimationFrame(()=>{if(log.isConnected)log.scrollTop=log.scrollHeight;});
 }
 export function fitBattle(){
  const stage=$app.querySelector('.react-battle-stage');if(!stage)return;
+ if(stage.classList.contains('fr-battle'))return fitFireRed(stage);
  const footer=innerWidth<=700?(document.querySelector('.react-mobile-nav')?.getBoundingClientRect().height||72):0;
  stage.style.setProperty('--battle-height',Math.max(420,innerHeight-stage.getBoundingClientRect().top-footer-16)+'px');
 }
