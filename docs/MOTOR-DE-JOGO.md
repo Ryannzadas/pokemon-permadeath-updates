@@ -5,7 +5,7 @@ O jogo está saindo de uma interface HTML/CSS ("site") para uma camada de jogo e
 ## Decisões
 
 - **Escopo híbrido.** Tudo que é jogo roda em Phaser: batalha, jornada, menus, mochila, equipe e mapas. Login, Team Builder e administração de ligas continuam em HTML, como janelas com visual de jogo.
-- **Resolução interna 480×270 (16:9)**, em pixel art. Por padrão o jogo preenche a janela; a opção "Pixels perfeitos" usa zoom inteiro nos pixels reais da tela (considerando a escala do Windows). F11 alterna a tela cheia (canal `window:fullscreen` do Electron).
+- **Resolução interna 480×270 (16:9)**, em pixel art, desenhada na resolução real da tela (câmera com zoom no tamanho em pixels do monitor), para textos nítidos. Por padrão o jogo preenche a janela; a opção "Pixels perfeitos" usa zoom inteiro nos pixels reais da tela (considerando a escala do Windows). F11 alterna a tela cheia (canal `window:fullscreen` do Electron).
 - **As regras não são reescritas.** O motor de regras (`game.js`, `expansion.js` e modelos) continua sendo a autoridade. As cenas só apresentam o estado e enviam comandos.
 - **Os saves não mudam.**
 
@@ -19,7 +19,7 @@ O jogo está saindo de uma interface HTML/CSS ("site") para uma camada de jogo e
 | `ui/engine/ui.js` | Texto pixelado, janelas, menu com cursor ▶ e rolagem, caixa de texto com digitação |
 | `ui/engine/bridge.js` | Ligação com o motor de regras: aviso de mudança de estado, comandos e opções |
 | `ui/engine/config.js` | Resolução, fonte e cores |
-| `ui/engine/assets.js` | Carregamento de imagens, medição de pixels dos sprites e sprite de espécie (FireRed ou comum) |
+| `ui/engine/assets.js` | Carregamento de imagens, medição de pixels, sprite de espécie (FireRed ou comum), ícone de menu, personagem andando e respiração dos líderes |
 | `ui/engine/scenes/battle-scene.js` | Batalhas da jornada: selvagem, treinador, treino, exploração e duplas |
 | `ui/engine/scenes/menu-scenes.js` | Título, modo, continuar, personagem, nome (campo HTML sobre o jogo) e inicial |
 | `ui/engine/scenes/screen-base.js` | Base das telas de menu (reconstrução por estado, janelas, cabeçalho, mensagens) |

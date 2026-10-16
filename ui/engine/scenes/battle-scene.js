@@ -4,7 +4,7 @@
 import { WIDTH, HEIGHT, TEXT, COLORS, hpColor } from '../config.js';
 import { pixelText, drawWindow, Menu, Typewriter } from '../ui.js';
 import { command, engineOptions, enginePrompt } from '../bridge.js';
-import { ensureTexture, pixelBounds } from '../assets.js';
+import { ensureTexture, pixelBounds, addIcon } from '../assets.js';
 
 const ARENA_H = 198;
 const BOX_Y = ARENA_H;
@@ -357,8 +357,7 @@ export const defineBattleScene = () => class BattleScene extends Phaser.Scene {
   drawPartyCell(c, item, x, y, focused) {
     const m = item.mon, w = 226, h = 48;
     this.cellFrame(c, x, y, w, h, focused, item.disabled);
-    const dex = SP[m.sp]?.dex, frlg = window.FRLG_SPRITES?.[dex];
-    this.iconFor(c, frlg ? `assets/sprites-frlg/${dex}-f.png` : SPRITE(dex, false), frlg ? `frlg:${dex}-f` : `spr:${SPRITE(dex, false)}`, x + 24, y + 24, 40, frlg ? 0.75 : 0.5);
+    addIcon(this, c, m.sp, x + 24, y + 38, 0.5);
     const ink = item.disabled ? COLORS.disabled : COLORS.ink;
     c.add(pixelText(this, x + 50, y + 3, nm(m), { size: TEXT.large, color: ink }));
     c.add(pixelText(this, x + w - 8, y + 3, `Nv${m.lvl}`, { size: TEXT.large, color: ink }).setOrigin(1, 0));

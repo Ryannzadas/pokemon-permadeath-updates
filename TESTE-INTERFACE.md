@@ -1,6 +1,14 @@
 # Pokémon Permadeath — teste das telas aprovadas
 
-Versão **0.4.1-test.12**.
+Versão **0.4.1-test.13**.
+
+## Novidades da test.13
+
+- Textos nítidos em qualquer tamanho de janela: o jogo é desenhado na resolução real da tela.
+- Ícones oficiais de menu dos Pokémon (PokéAPI, offline) nas listas da jornada, batalha, resultado e continuar.
+- Personagens jogáveis animados (andando no lugar); líderes com animação de respiração e entrada.
+
+## test.12
 
 ## Novidades da test.12
 

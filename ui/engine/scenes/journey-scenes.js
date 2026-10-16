@@ -5,7 +5,7 @@
 import { WIDTH, HEIGHT, TEXT, COLORS, hpColor } from '../config.js';
 import { pixelText, drawWindow, Menu, Typewriter } from '../ui.js';
 import { command, engineOptions } from '../bridge.js';
-import { ensureTexture, addSpecies, addIcon } from '../assets.js';
+import { ensureTexture, addSpecies, addIcon, addWalker, breathe } from '../assets.js';
 import { defineScreenScene, iconScale, money } from './screen-base.js';
 
 const GOLD = '#e3bd69';
@@ -23,7 +23,7 @@ export function defineJourneyScenes(engine) {
       // Trainer panel: who, where, money, badges and the level cap.
       this.win(6, 6, 300, 66);
       const t = CAMP_ASSETS.trainers.find(x => x.id === R.trainer) || CAMP_ASSETS.trainers[0];
-      this.image('trainer:' + t.id, t.portrait, 36, 66, { scale: 0.75 });
+      addWalker(this, this.root, t.id, 38, 66, 1.25);
       this.root.add(pixelText(this, 70, 9, R.trainerName || 'Treinador', { size: TEXT.large }));
       this.root.add(pixelText(this, 70, 29, `${R.postgame ? 'Pós-game em duplas · ' : ''}${R.mode === 'classic' ? 'Clássico' : 'Permadeath'} · Batalha ${R.battle + 1}`, { size: TEXT.small, color: COLORS.inkSoft }));
       this.root.add(pixelText(this, 298, 9, money(R.money), { size: TEXT.large }).setOrigin(1, 0));
@@ -81,7 +81,7 @@ export function defineJourneyScenes(engine) {
 
       const info = trainer ? `Próximo desafio: ${trainer.name} · ${trainer.type ? TYPES[trainer.type]?.[0] : 'Tipos variados'} · ${trainer.team.length} Pokémon${boss ? ' · disponível agora' : ''}` : boss ? next.title : `Próxima batalha: ${R.battle + 1}`;
       this.message(S.msg || info, { y: HEIGHT - 56, h: 52 });
-      if (trainer && !S.msg) this.image('leader:' + trainer.sprite, `assets/trainers/${trainer.sprite}.png`, WIDTH - 40, HEIGHT - 6, { scale: 0.6 });
+      if (trainer && !S.msg) breathe(this, this.image('leader:' + trainer.sprite, `assets/trainers/${trainer.sprite}.png`, WIDTH - 36, HEIGHT - 8, { scale: 0.5 }));
     }
   }
 
@@ -94,13 +94,14 @@ export function defineJourneyScenes(engine) {
       this.cover('arena:' + (window.battleArenaName?.() || 'Estádio'), `assets/visual/${window.battleArenaName?.() || 'Estádio'}.webp`, 0.55);
       const role = document.querySelector('#app .trainer-intro > p')?.textContent.trim() || 'Desafio';
       this.root.add(pixelText(this, WIDTH / 2, 12, role.toUpperCase(), { size: TEXT.body, color: GOLD, shadow: '#202020' }).setOrigin(0.5, 0));
-      this.image('leader:' + t.sprite, `assets/trainers/${t.sprite}.png`, 96, 150, { scale: 1.5 });
+      breathe(this, this.image('leader:' + t.sprite, `assets/trainers/${t.sprite}.png`, 96, 150, { scale: 1.5 }));
+      this.tweens.add({ targets: this.root.list.at(-1), x: { from: -40, to: 96 }, duration: 420, ease: 'Cubic.out' });
       this.root.add(pixelText(this, 172, 34, t.name, { size: 40, color: '#ffffff', shadow: '#202020' }));
       this.root.add(pixelText(this, 174, 76, `${t.type ? 'Especialidade: ' + TYPES[t.type]?.[0] : 'Tipos variados'} · ${B.enemies.length} Pokémon`, { size: TEXT.large, color: '#e8f4fb', shadow: '#202020' }));
       B.enemies.forEach((m, i) => {
         const x = 176 + i * 50, c = this.add.container(0, 0); this.root.add(c);
         c.add(this.add.graphics().fillStyle(0xf8f8f0, 0.9).fillRoundedRect(x, 100, 46, 56, 4));
-        addSpecies(this, c, m.sp, x + 23, 138, { scale: iconScale(m.sp) * 1.5 });
+        addIcon(this, c, m.sp, x + 23, 136, iconScale(m.sp));
         c.add(pixelText(this, x + 23, 140, `Nv${m.lvl}`, { size: TEXT.body }).setOrigin(0.5, 0));
       });
       this.win(4, HEIGHT - 62, WIDTH - 8, 58, 'message');
@@ -135,7 +136,7 @@ export function defineJourneyScenes(engine) {
       lines.slice(0, 4).forEach((line, i) => this.root.add(pixelText(this, 20, 62 + i * 18, line, { size: i === 0 ? TEXT.large : TEXT.body, width: 200 })));
       R.team.slice(0, 6).forEach((m, i) => {
         const x = 18 + (i % 2) * 104, y = 136 + Math.floor(i / 2) * 22, c = this.add.container(0, 0); this.root.add(c);
-        addSpecies(this, c, m.sp, x + 10, y + 20, { scale: iconScale(m.sp) * 0.6 }).setAlpha(m.hp > 0 ? 1 : 0.4);
+        addIcon(this, c, m.sp, x + 10, y + 22, iconScale(m.sp) * 0.6).setAlpha(m.hp > 0 ? 1 : 0.4);
         c.add(pixelText(this, x + 22, y, `${nm(m)} Nv${m.lvl}`, { size: TEXT.body, color: m.hp > 0 ? COLORS.ink : COLORS.disabled }));
         this.hpBar(c, x + 22, y + 13, 72, m);
       });

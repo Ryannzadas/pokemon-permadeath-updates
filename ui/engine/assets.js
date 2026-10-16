@@ -60,3 +60,24 @@ export function addIcon(scene, container, sp, x, ground, fallbackScale = 0.5) {
   ensureTexture(scene, key, `assets/icons/${dex}.png`, () => { if (img.active) img.setTexture(key).setVisible(true); });
   return img;
 }
+
+// Player character walking in place (facing the camera), from the camp walking sheets (4x4 frames of 32x48).
+export function addWalker(scene, container, trainerId, x, ground, scale = 1.5) {
+  const t = CAMP_ASSETS.trainers.find(tr => tr.id === trainerId) || CAMP_ASSETS.trainers[0];
+  const key = `walk:${t.id}`, sprite = scene.add.sprite(x, ground, '__DEFAULT').setOrigin(0.5, 1).setVisible(false);
+  container?.add(sprite);
+  const start = () => {
+    if (!sprite.active) return;
+    if (!scene.anims.exists(key)) scene.anims.create({ key, frames: scene.anims.generateFrameNumbers(key, { start: 0, end: 3 }), frameRate: 6, repeat: -1 });
+    sprite.setTexture(key, 0).setScale(scale).setVisible(true).play(key);
+  };
+  if (scene.textures.exists(key)) start();
+  else { scene.load.spritesheet(key, t.sheet, { frameWidth: 32, frameHeight: 48 }); scene.load.once(`filecomplete-spritesheet-${key}`, start); if (!scene.load.isLoading()) scene.load.start(); }
+  return sprite;
+}
+
+// Leaders only exist as still images: a slow breathing loop keeps them alive on screen.
+export function breathe(scene, target) {
+  scene.tweens.add({ targets: target, scaleY: { from: target.scaleY || 1, to: (target.scaleY || 1) * 1.025 }, duration: 1100, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
+  return target;
+}

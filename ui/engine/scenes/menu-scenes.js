@@ -4,7 +4,7 @@
 import { WIDTH, HEIGHT, TEXT, COLORS } from '../config.js';
 import { pixelText, drawWindow, Menu, Typewriter } from '../ui.js';
 import { command } from '../bridge.js';
-import { ensureTexture, addSpecies } from '../assets.js';
+import { ensureTexture, addSpecies, addIcon, addWalker } from '../assets.js';
 import { defineScreenScene } from './screen-base.js';
 
 const GOLD = '#e3bd69';
@@ -92,7 +92,7 @@ export function defineMenuScenes(engine) {
           c.add(pixelText(this, x + 10, y + 4, ModeSaveStore.label(item.slot), { size: TEXT.small, color: COLORS.inkSoft }));
           c.add(pixelText(this, x + 10, y + 15, r.trainerName || 'Treinador', { size: TEXT.large }));
           c.add(pixelText(this, x + 210, y + 19, `Batalha ${r.battle + 1}`, { size: TEXT.small, color: COLORS.inkSoft }).setOrigin(1, 0));
-          r.team.slice(0, 6).forEach((m, i) => addSpecies(this, c, m.sp, x + 24 + i * 34, y + 70, { scale: window.FRLG_SPRITES?.[SP[m.sp]?.dex] ? 0.5 : 1 / 3 }).setAlpha(m.hp > 0 ? 1 : 0.35));
+          r.team.slice(0, 6).forEach((m, i) => addIcon(this, c, m.sp, x + 24 + i * 34, y + 70, 1 / 3).setAlpha(m.hp > 0 ? 1 : 0.35));
           if (focused) c.add(pixelText(this, x - 8, y + 30, '▶', { size: TEXT.body }));
         },
       });
@@ -116,9 +116,8 @@ export function defineMenuScenes(engine) {
         onBack: () => command(continuing ? 'characterBack' : 'changeMode'),
         drawCell: (c, item, x, y, focused) => {
           this.card(c, x, y, 86, 78, focused);
-          const img = this.add.image(x + 43, y + 58, '__DEFAULT').setOrigin(0.5, 1).setVisible(false); c.add(img);
-          ensureTexture(this, 'trainer:' + item.id, item.portrait, () => { if (img.active) img.setTexture('trainer:' + item.id).setScale(item.portrait && this.textures.get('trainer:' + item.id).getSourceImage().height > 70 ? 0.75 : 1).setVisible(true); });
-          c.add(pixelText(this, x + 43, y + 60, item.name, { size: TEXT.body }).setOrigin(0.5, 0));
+          addWalker(this, c, item.id, x + 43, y + 64, 1.25);
+          c.add(pixelText(this, x + 43, y + 65, item.name, { size: TEXT.body }).setOrigin(0.5, 0));
         },
       });
       this.root.add(this.menu.container);
@@ -136,8 +135,7 @@ export function defineMenuScenes(engine) {
       const g = this.add.graphics(); this.root.add(g);
       drawWindow(g, 60, 52, 360, 140, { fill: COLORS.menuFill, border: COLORS.menuBorder, inner: COLORS.menuInner, radius: 6 });
       const t = CAMP_ASSETS.trainers.find(x => x.id === S.pendingTrainer) || CAMP_ASSETS.trainers[0];
-      const img = this.add.image(120, 172, '__DEFAULT').setOrigin(0.5, 1).setVisible(false); this.root.add(img);
-      ensureTexture(this, 'trainer:' + t.id, t.portrait, () => { if (img.active) img.setTexture('trainer:' + t.id).setVisible(true); });
+      addWalker(this, this.root, t.id, 120, 172, 2);
       this.root.add(pixelText(this, 176, 66, 'Nome do treinador', { size: TEXT.large }));
       this.root.add(pixelText(this, 176, 150, 'Enter: confirmar · Esc: voltar', { size: TEXT.small, color: COLORS.inkSoft }));
       this.field = { x: 176, y: 96, w: 220, h: 26 };
