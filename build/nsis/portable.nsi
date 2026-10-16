@@ -1,5 +1,5 @@
-!include "${PROJECT_DIR}/build/nsis/common.nsh"
-!include "${PROJECT_DIR}/build/nsis/include/extractAppPackage.nsh"
+!include "${PROJECT_DIR}\build\nsis\common.nsh"
+!include "${PROJECT_DIR}\build\nsis\include\extractAppPackage.nsh"
 
 # https://github.com/electron-userland/electron-builder/issues/3972#issuecomment-505171582
 CRCCheck off

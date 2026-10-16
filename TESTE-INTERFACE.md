@@ -1,6 +1,16 @@
 # Pokémon Permadeath — teste das telas aprovadas
 
-Versão **0.4.1-test.7**.
+Versão **0.4.1-test.8**.
+
+## Novidades da test.8
+
+- Batalhas no estilo FireRed em todos os formatos (jornada, treino, duplas, Social e liga): menu LUTAR/MOCHILA/POKÉMON/FUGIR, caixa de texto com as ações e fonte pixelada Jersey 10 (licença OFL).
+- Golpes com a cor do tipo e indicação Super efetivo / Efetivo / Pouco efetivo nas batalhas simples da jornada.
+- Sprites originais de FireRed/LeafGreen (PokéAPI, offline) para as espécies #1-386; as demais mantêm o sprite atual.
+- Teclado na batalha: setas, Z confirma, X/Esc volta; 1-4 continua usando golpes direto.
+- Mochila redesenhada com abas e cartões; relíquias do Permadeath voltam a aparecer.
+- Loja abre em Pokébolas no Clássico; "Outros" passa a ser a última aba.
+- Correções: sprites cobrindo nomes na apresentação dos líderes, busca invisível no Team Builder, Voltar duplicado, dinheiro sem formatação e nomes como Mr. Mime e Nidoran♀/♂.
 
 ## Instalar
 

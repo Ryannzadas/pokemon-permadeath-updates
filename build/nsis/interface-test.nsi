@@ -7,7 +7,7 @@ Unicode true
  !error "Passe APP_STAGE com a pasta do aplicativo Windows empacotado"
 !endif
 !ifndef OUTPUT_SETUP
- !define OUTPUT_SETUP "${PROJECT_DIR}/dist/Pokemon-Permadeath-Teste-Visual-Interface-Setup-r2.exe"
+ !define OUTPUT_SETUP "${PROJECT_DIR}\dist\Pokemon-Permadeath-Teste-Visual-Interface-Setup-r2.exe"
 !endif
 Name "Pokemon Permadeath - Teste Visual"
 OutFile "${OUTPUT_SETUP}"
@@ -15,7 +15,7 @@ InstallDir "$LOCALAPPDATA\Programs\Pokemon Permadeath - Teste Visual"
 InstallDirRegKey HKCU "Software\PokemonPermadeathVisualTest" "InstallDir"
 RequestExecutionLevel user
 SetCompressor /SOLID zlib
-!define MUI_ICON "${PROJECT_DIR}/build/app-icon.ico"
+!define MUI_ICON "${PROJECT_DIR}\build\app-icon.ico"
 !define MUI_UNICON "${MUI_ICON}"
 !define MUI_ABORTWARNING
 !insertmacro MUI_PAGE_WELCOME

@@ -1,4 +1,4 @@
-!include "${PROJECT_DIR}/build/nsis/include/installer.nsh"
+!include "${PROJECT_DIR}\build\nsis\include\installer.nsh"
 
 InitPluginsDir
 

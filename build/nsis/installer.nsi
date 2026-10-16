@@ -5,10 +5,10 @@ Var oldDesktopLink
 Var oldShortcutName
 Var oldMenuDirectory
 
-!include "${PROJECT_DIR}/build/nsis/common.nsh"
+!include "${PROJECT_DIR}\build\nsis\common.nsh"
 !include "MUI2.nsh"
-!include "${PROJECT_DIR}/build/nsis/multiUser.nsh"
-!include "${PROJECT_DIR}/build/nsis/include/allowOnlyOneInstallerInstance.nsh"
+!include "${PROJECT_DIR}\build\nsis\multiUser.nsh"
+!include "${PROJECT_DIR}\build\nsis\include\allowOnlyOneInstallerInstance.nsh"
 
 !ifdef BUILD_UNINSTALLER
   !ifmacrodef customUnInstallSection
@@ -35,9 +35,9 @@ Var oldMenuDirectory
 !endif
 
 !ifdef ONE_CLICK
-  !include "${PROJECT_DIR}/build/nsis/oneClick.nsh"
+  !include "${PROJECT_DIR}\build\nsis\oneClick.nsh"
 !else
-  !include "${PROJECT_DIR}/build/nsis/assistedInstaller.nsh"
+  !include "${PROJECT_DIR}\build\nsis\assistedInstaller.nsh"
 !endif
 
 !insertmacro MUI_UNPAGE_INSTFILES
@@ -89,7 +89,7 @@ Function .onInit
 FunctionEnd
 
 !ifndef BUILD_UNINSTALLER
-  !include "${PROJECT_DIR}/build/nsis/include/installUtil.nsh"
+  !include "${PROJECT_DIR}\build\nsis\include\installUtil.nsh"
 !endif
 
 Section "install" INSTALL_SECTION_ID
@@ -120,7 +120,7 @@ Section "install" INSTALL_SECTION_ID
           ${endIf}
       !endif
     !endif
-    !include "${PROJECT_DIR}/build/nsis/installSection.nsh"
+    !include "${PROJECT_DIR}\build\nsis\installSection.nsh"
   !endif
 SectionEnd
 
@@ -129,4 +129,4 @@ Function setInstallSectionSpaceRequired
 FunctionEnd
 
 !define BUILD_UNINSTALLER
-!include "${PROJECT_DIR}/build/nsis/uninstaller.nsh"
+!include "${PROJECT_DIR}\build\nsis\uninstaller.nsh"

@@ -1,9 +1,9 @@
 # functions (nsis macro) for installer
 
-!include "${PROJECT_DIR}/build/nsis/include/extractAppPackage.nsh"
+!include "${PROJECT_DIR}\build\nsis\include\extractAppPackage.nsh"
 
 !ifdef APP_PACKAGE_URL
-  !include "${PROJECT_DIR}/build/nsis/include/webPackage.nsh"
+  !include "${PROJECT_DIR}\build\nsis\include\webPackage.nsh"
 !endif
 
 !macro installApplicationFiles

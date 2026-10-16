@@ -1,7 +1,7 @@
-!include "${PROJECT_DIR}/build/nsis/include/UAC.nsh"
+!include "${PROJECT_DIR}\build\nsis\include\UAC.nsh"
 
 !ifndef INSTALL_MODE_PER_ALL_USERS
-  !include "${PROJECT_DIR}/build/nsis/multiUserUi.nsh"
+  !include "${PROJECT_DIR}\build\nsis\multiUserUi.nsh"
 !endif
 
 !ifndef BUILD_UNINSTALLER
@@ -20,7 +20,7 @@
   !endif
 
   !ifdef allowToChangeInstallationDirectory
-    !include "${PROJECT_DIR}/build/nsis/include/StrContains.nsh"
+    !include "${PROJECT_DIR}\build\nsis\include\StrContains.nsh"
 
     !insertmacro skipPageIfUpdated
     !insertmacro MUI_PAGE_DIRECTORY

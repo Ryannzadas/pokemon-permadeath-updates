@@ -1,9 +1,9 @@
 !ifndef nsProcess::FindProcess
-    !include "${PROJECT_DIR}/build/nsis/include/nsProcess.nsh"
+    !include "${PROJECT_DIR}\build\nsis\include\nsProcess.nsh"
 !endif
 
 !ifmacrondef customCheckAppRunning
-  !include "${PROJECT_DIR}/build/nsis/include/getProcessInfo.nsh"
+  !include "${PROJECT_DIR}\build\nsis\include\getProcessInfo.nsh"
   Var pid
 !endif
 

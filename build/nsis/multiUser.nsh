@@ -1,5 +1,5 @@
 !include FileFunc.nsh
-!include "${PROJECT_DIR}/build/nsis/include/UAC.nsh"
+!include "${PROJECT_DIR}\build\nsis\include\UAC.nsh"
 
 !define FOLDERID_UserProgramFiles {5CD7AEE2-2219-4A67-B85D-6C9CE15660CB}
 !define KF_FLAG_CREATE 0x00008000
