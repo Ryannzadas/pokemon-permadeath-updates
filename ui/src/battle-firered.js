@@ -1,12 +1,42 @@
-// FireRed-style presentation for single battles. The engine's own buttons are moved into the
-// GBA-like frame, so actions, disabled states and battle rules stay in the engine.
+// FireRed-style presentation for every battle: journey singles and doubles, Social and league.
+// The engine's own buttons are moved into the GBA-like frame, so actions, disabled states and
+// battle rules stay in the journey engine or the online battle client.
 const SCENE_W=360,SCENE_H=240;
-const FR={battle:null,fight:false,moveIndex:0,lastMsg:'',typing:0};
+const FR={key:null,actor:null,fight:false,moveIndex:0,lastMsg:'',typing:0};
 
-export const fireRedActive=()=>S.screen==='battle'&&!!B&&!B.double;
+const arenaOf=()=>$app.querySelector('.battle-classic,.handheld-arena');
+export const fireRedActive=()=>S.screen==='battle'&&!!B||S.screen==='multiplayer'&&!!arenaOf();
 
 const el=(tag,cls,html='')=>{const n=document.createElement(tag);if(cls)n.className=cls;if(html)n.innerHTML=html;return n;};
 const effLabel={'super efetivo':'Super efetivo','pouco efetivo':'Pouco efetivo','sem efeito':'Sem efeito'};
+const cmd=(label,attrs,disabled,sub='')=>`<button class="fr-cmd" ${attrs} ${disabled?'disabled':''}><span class="fr-cursor">▶</span><span>${label}${sub?`<small>${sub}</small>`:''}</span></button>`;
+const blank='<span class="fr-cmd fr-cmd-empty"></span>';
+
+// What each battle client offers, read from the markup and navigation it already produces.
+function journeyView(items){
+ const find=(action,value)=>items.find(x=>x.action===action&&(value===undefined||x.value===value));
+ const bag=find('menu','bag'),ball=find('menu','ball'),party=find('menu','switch'),flee=find('flee');
+ const actor=R.team[B.double?B.playerSlots[Math.min(B.commands.length,B.playerSlots.length-1)]:B.playerSlots?.[0]??R.active];
+ const fleeCost=flee&&!B.train?String(flee.label).split('·')[1]?.trim()||'':'';
+ return {key:B,actorKey:B.double?B.commands.length:0,actor:actor&&nm(actor),exp:B.double?null:actor,
+  locked:!!B.lock,menu:B.forced?'switch':B.menu,message:B.log?.at(-1)||'',effKnown:!B.double,
+  // Wild battles reach Poké Balls through the bag, as in FireRed.
+  commands:cmd('MOCHILA','data-act="menu" data-v="bag"',!bag||bag.disabled&&!(ball&&!ball.disabled))+cmd('POKÉMON','data-act="menu" data-v="switch"',!party||party.disabled)+(flee?cmd(B.train?'SAIR':'FUGIR','data-act="flee"',flee.disabled,fleeCost):blank),
+  tabs:['bag','ball'].includes(B.menu)&&ball?[['menu','bag','Itens',bag],['menu','ball','Pokébolas',ball]]:null,
+  title:B.forced?'Pokémon':{bag:'Mochila',ball:'Pokébolas',switch:'Pokémon',itemTarget:'Mochila',itemMove:'Mochila',target:'Alvo'}[B.menu]||'',
+  hint:{bag:'Usar qual item?',ball:'Usar qual Pokébola?',switch:'Escolha um Pokémon.',itemTarget:'Usar em qual Pokémon?',itemMove:'Restaurar PP de qual golpe?',target:'Escolha o alvo.'}[B.menu]};
+}
+function onlineView(stage,controls,items){
+ const wrap=controls.querySelector('.pvp-journey-controls'),prompt=wrap?.querySelector(':scope>p')?.textContent.trim()||'';
+ const hasMoves=!!wrap?.querySelector('[data-act="pvpMove"]'),hasButtons=!!wrap?.querySelector('button');
+ const bag=items.find(x=>x.value==='bag'),party=items.find(x=>x.value==='pokemon');
+ const actor=prompt.match(/^Escolha a ação de (.+?) ·/)?.[1]||stage.querySelector('.player-status .nm,.handheld-mon.player strong')?.firstChild?.textContent.split(' · ')[0].trim();
+ const forfeit=!!$app.querySelector('[data-act="forfeitBattle"]');
+ return {key:'online',actorKey:prompt,actor,exp:null,locked:!hasButtons,menu:hasMoves?'moves':'other',
+  message:stage.querySelector('.pvp-status')?.textContent.trim()||prompt,effKnown:false,
+  commands:cmd('MOCHILA','data-act="pvpMenu" data-v="bag"',!bag||bag.disabled)+cmd('POKÉMON','data-act="pvpMenu" data-v="pokemon"',!party||party.disabled)+(forfeit?cmd('DESISTIR','data-act="forfeitBattle"',false):blank),
+  tabs:null,title:/desmaiou|Trocar/.test(prompt)?'Pokémon':/alvo/.test(prompt)?'Alvo':/Usar em|PP/.test(prompt)?'Mochila':wrap?.querySelector('[data-act="pvpItem"]')?'Mochila':'',hint:prompt};
+}
 
 function readableOn(color){
  const c=document.createElement('canvas').getContext?.('2d');if(!c)return 'fr-ink-dark';c.fillStyle=color;const hex=c.fillStyle;
@@ -16,11 +46,12 @@ function readableOn(color){
 }
 
 // Turns an engine move button ("Nome<small>Tipo · poder 40 · PP 35/35 · super efetivo</small>") into a FireRed cell.
-function moveCell(button,i){
+// Effectiveness is shown when the engine computed it (single journey battles); damaging moves without a tag are "Efetivo".
+function moveCell(button,i,effKnown){
  const small=button.querySelector('small'),parts=(small?.textContent||'').split(' · ').map(s=>s.trim());
  const name=[...button.childNodes].filter(n=>n!==small).map(n=>n.textContent).join('').trim();
  const status=parts[1]==='Status',pp=parts.find(p=>p.startsWith('PP '))||'',tag=parts.find(p=>effLabel[p]);
- const eff=status?'':tag?effLabel[tag]:'Efetivo',lock=parts.find(p=>p.startsWith('travado'));
+ const eff=status?'':tag?effLabel[tag]:effKnown?'Efetivo':'',lock=parts.find(p=>p.startsWith('travado'));
  Object.assign(button.dataset,{frType:parts[0]||'',frPp:pp,frEff:eff,frPower:status?'Status':parts[1]||'',frIndex:String(i),frNote:lock||''});
  button.className=`mv fr-move ${readableOn(button.style.getPropertyValue?.('--move-color').trim()||'#a8a878')}${button.disabled?' is-disabled':''}`;
  button.innerHTML=`<span class="fr-move-name">${esc(name)}</span>${eff?`<span class="fr-eff fr-eff-${eff==='Super efetivo'?'up':eff==='Efetivo'?'mid':'down'}">${eff}</span>`:''}`;
@@ -42,64 +73,71 @@ function typeMessage(p,text){
  p.textContent='';requestAnimationFrame(step);
 }
 
-function commandMenu(items){
- const find=(action,value)=>items.find(x=>x.action===action&&(value===undefined||x.value===value));
- const bag=find('menu','bag'),ball=find('menu','ball'),party=find('menu','switch'),flee=find('flee');
- const cmd=(label,attrs,disabled,sub='')=>`<button class="fr-cmd" ${attrs} ${disabled?'disabled':''}><span class="fr-cursor">▶</span><span>${label}${sub?`<small>${sub}</small>`:''}</span></button>`;
- const fleeCost=flee&&!B.train?String(flee.label).split('·')[1]?.trim()||'':'';
- // Wild battles reach Poké Balls through the bag, as in FireRed.
- const bagAttrs=bag?`data-act="menu" data-v="bag"`:'';
- return `<div class="fr-menu fr-grid" role="menu" aria-label="Comandos da batalha">${cmd('LUTAR','data-fr="fight"',false)}${cmd('MOCHILA',bagAttrs,!bag||bag.disabled&&!(ball&&!ball.disabled))}${cmd('POKÉMON','data-act="menu" data-v="switch"',!party||party.disabled)}${flee?cmd(B.train?'SAIR':'FUGIR','data-act="flee"',flee.disabled,fleeCost):''}</div>`;
+// FireRed/LeafGreen art from PokeAPI for species #1-386; later species keep the regular sprite.
+// The manifest gives each sprite's empty rows at the bottom; dropping by that rests it on the ground.
+function gbaSprites(arena){
+ for(const img of arena.querySelectorAll('.battle-mon img,.handheld-sprite img')){
+  const dex=Number(img.getAttribute('src')?.match(/\/(\d+)(?:-[a-z]+)?\.png$/)?.[1]),pad=window.FRLG_SPRITES?.[dex];if(!pad)continue;
+  const side=img.closest('.art')?.classList.contains('back')?'b':'f',box=img.closest('.battle-mon,.handheld-sprite');
+  img.src=`assets/sprites-frlg/${dex}-${side}.png`;box.classList.add('fr-gba');box.style.setProperty('--fr-drop',pad[side==='f'?0:1]*1.5);
+ }
 }
 
 export function presentFireRed(stage,items){
- if(!fireRedActive()){FR.battle=null;return;}
- if(FR.battle!==B){FR.battle=B;FR.fight=false;FR.moveIndex=0;FR.lastMsg='';}
- if(B.lock||B.forced)FR.fight=false;
- stage.classList.add('fr-battle');
- const arena=stage.querySelector(':scope>.battle-classic'),controls=stage.querySelector(':scope>.react-battle-choices');
+ if(!fireRedActive()){FR.key=null;return;}
+ const arena=stage.querySelector(':scope>.battle-classic,:scope>.handheld-arena'),controls=stage.querySelector(':scope>.react-battle-choices');
  if(!arena||!controls)return;
+ // Battle history and options (Social) stay below the scene; only the command controls move into the frame.
+ stage.after(...controls.querySelectorAll(':scope>details'));
+ const view=S.screen==='multiplayer'?onlineView(stage,controls,items):journeyView(items);
+ if(FR.key!==view.key){FR.key=view.key;FR.fight=false;FR.moveIndex=0;FR.lastMsg='';}
+ if(FR.actor!==view.actorKey){FR.actor=view.actorKey;FR.fight=false;FR.moveIndex=0;}
+ if(view.locked)FR.fight=false;
+ stage.classList.add('fr-battle');stage.classList.toggle('fr-double',arena.classList.contains('handheld-arena'));
  const frame=el('div','fr-frame');stage.prepend(frame);frame.append(arena);
-
+ gbaSprites(arena);
  // Player status: HP numbers and EXP bar, as in the GBA games.
- const pm=R.team[B.playerSlots?.[0]??R.active];
- // FireRed/LeafGreen art from PokeAPI for species #1-386; later species keep the regular sprite.
- // The manifest gives each sprite's empty rows at the bottom; dropping by that rests it on the ground.
- const gba=(img,m,side)=>{const dex=SP[m?.sp]?.dex,pad=window.FRLG_SPRITES?.[dex];if(!img||!pad)return;img.src=`assets/sprites-frlg/${dex}-${side}.png`;const box=img.closest('.battle-mon');box?.classList.add('fr-gba');box?.style.setProperty('--fr-drop',pad[side==='f'?0:1]*1.5);};
- gba(arena.querySelector('.enemy-mon img'),B.enemy,'f');gba(arena.querySelector('.player-mon img'),pm,'b');
  const ps=arena.querySelector('.player-status');
- if(ps&&pm&&!ps.querySelector('.fr-exp'))ps.insertAdjacentHTML('beforeend',`<div class="fr-exp"><span>EXP</span>${xpBar(pm)}</div>`);
+ if(ps&&view.exp&&!ps.querySelector('.fr-exp'))ps.insertAdjacentHTML('beforeend',`<div class="fr-exp"><span>EXP</span>${xpBar(view.exp)}</div>`);
 
  const box=el('div','fr-textbox');frame.append(box);
  const message=el('div','fr-message'),p=el('p');message.append(p);
- const idle=!B.lock&&!B.forced&&B.menu==='moves';
  const moves=[...controls.querySelectorAll('.moves .mv')];
- // Forced replacement after a faint always opens the party list so the player is never stuck.
- if(!B.lock&&(B.forced||B.menu!=='moves')){
-  // Bag, Poké Balls, party and targets keep the engine's own lists, shown as a full-scene menu.
+ const targets=[...controls.querySelectorAll('[data-act="target"],[data-act="pvpTarget"]')];
+ if(!view.locked&&targets.length){
+  // Targets are picked in the text box so both sides of the field stay visible, as in FireRed.
+  const source=controls.querySelector('.pvp-journey-controls')||controls,prompt=source.querySelector(':scope>p')?.textContent.trim()||'Escolha o alvo.';
+  const backBtn=source.querySelector('[data-act="pvpMenu"][data-v="main"],[data-act="menu"][data-v="moves"]');
+  const menu=el('div','fr-menu fr-grid');menu.setAttribute('role','menu');
+  for(const b of [...targets,...(backBtn?[backBtn]:[])]){const label=b.textContent.trim();b.className='fr-cmd';b.innerHTML=`<span class="fr-cursor">▶</span><span>${esc(b===backBtn?'VOLTAR':label)}</span>`;menu.append(b);}
+  box.append(message,menu);typeMessage(p,prompt.replace(/:$/,'.'));
+ }else if(!view.locked&&view.menu!=='moves'){
+  // Bag, Poké Balls, party, targets and forced replacements keep the engine's own lists, shown as a full-scene menu.
   const overlay=el('div','fr-overlay');overlay.setAttribute('role','dialog');
-  const prompt=controls.querySelector(':scope>p')?.textContent.trim();
-  const title=B.forced?'Pokémon':{bag:'Mochila',ball:'Pokébolas',switch:'Pokémon',itemTarget:'Mochila',itemMove:'Mochila',target:'Alvo'}[B.menu]||'';
-  const tabs=['bag','ball'].includes(B.menu)&&items.some(x=>x.value==='ball')?`<nav class="fr-tabs">${[['bag','Itens'],['ball','Pokébolas']].map(([v,l])=>{const it=items.find(x=>x.value===v);return `<button class="fr-tab" data-act="menu" data-v="${v}" aria-pressed="${B.menu===v}" ${it?.disabled?'disabled':''}>${l}</button>`;}).join('')}</nav>`:'';
-  overlay.innerHTML=`<header class="fr-overlay-head"><strong>${title}</strong>${tabs}</header>`;
-  const body=el('div','fr-overlay-body');while(controls.firstChild)body.append(controls.firstChild);body.querySelector(':scope>p')?.remove();
+  const tabs=view.tabs?`<nav class="fr-tabs">${view.tabs.map(([act,v,label,it])=>`<button class="fr-tab" data-act="${act}" data-v="${v}" aria-pressed="${B.menu===v}" ${it?.disabled?'disabled':''}>${label}</button>`).join('')}</nav>`:'';
+  overlay.innerHTML=`<header class="fr-overlay-head"><strong>${view.title}</strong>${tabs}</header>`;
+  const body=el('div','fr-overlay-body');
+  const source=controls.querySelector('.pvp-journey-controls')||controls;
+  const prompt=source.querySelector(':scope>p')?.textContent.trim();source.querySelector(':scope>p')?.remove();
+  while(source.firstChild)body.append(source.firstChild);
   overlay.append(body);frame.append(overlay);
-  message.classList.add('is-wide');box.append(message);typeMessage(p,prompt||{bag:'Usar qual item?',ball:'Usar qual Pokébola?',switch:'Escolha um Pokémon.',itemTarget:'Usar em qual Pokémon?',itemMove:'Restaurar PP de qual golpe?',target:'Escolha o alvo.'}[B.menu]||'Escolha uma opção.');
- }else if(idle&&FR.fight&&moves.length){
-  const grid=el('div','fr-moves fr-grid');moves.forEach((b,i)=>grid.append(moveCell(b,i)));
+  message.classList.add('is-wide');box.append(message);typeMessage(p,prompt||view.hint||'Escolha uma opção.');
+ }else if(!view.locked&&FR.fight&&moves.length){
+  const grid=el('div','fr-moves fr-grid');moves.forEach((b,i)=>grid.append(moveCell(b,i,view.effKnown)));
   for(let i=moves.length;i<4;i++)grid.append(el('span','fr-move-empty','—'));
   const info=el('div','fr-info');
   FR.moveIndex=Math.min(FR.moveIndex,moves.length-1);
   const show=i=>{FR.moveIndex=i;info.innerHTML=moveInfo(moves[i])+`<button class="fr-back" data-fr="back">◀ Voltar</button>`;moves.forEach((b,k)=>b.classList.toggle('is-current',k===i));};
   moves.forEach((b,i)=>{b.addEventListener('mouseenter',()=>show(i));b.addEventListener('focus',()=>show(i));});
   show(FR.moveIndex);box.append(grid,info);
- }else if(idle){
-  box.append(message);typeMessage(p,`O que ${nm(pm)} vai fazer?`);
-  box.insertAdjacentHTML('beforeend',commandMenu(items));
+ }else if(!view.locked){
+  box.append(message);typeMessage(p,`O que ${view.actor||'seu Pokémon'} vai fazer?`);
+  box.insertAdjacentHTML('beforeend',`<div class="fr-menu fr-grid" role="menu" aria-label="Comandos da batalha">${cmd('LUTAR','data-fr="fight"',!moves.length)}${view.commands}</div>`);
  }else{
-  message.classList.add('is-wide');box.append(message);typeMessage(p,B.log?.at(-1)||'');
+  message.classList.add('is-wide');box.append(message);typeMessage(p,view.message);
  }
- controls.remove();stage.querySelector(':scope>.battle-log')?.remove();
+ // The engine log stays in the page (hidden) for history and accessibility; the text box shows the current line.
+ controls.remove();
  fitFireRed(stage);
  focusMenu(stage);
 }
@@ -124,14 +162,14 @@ export function fitFireRed(stage=$app.querySelector('.react-battle-stage.fr-batt
 function back(){
  if(FR.fight){FR.fight=false;render();return true;}
  // The engine's own "Voltar" in the menu body (the category tabs are not a way back).
- const engineBack=[...$app.querySelectorAll('.fr-overlay-body [data-act="menu"]')].at(-1);
+ const engineBack=[...$app.querySelectorAll('.fr-overlay-body :is([data-act="menu"],[data-act="pvpMenu"])')].at(-1);
  if(engineBack&&!engineBack.disabled){engineBack.click();return true;}
  return false;
 }
 
 export function installFireRedInput(){
  document.addEventListener('click',event=>{
-  const target=event.target.closest('[data-fr]');if(!target||!fireRedActive()||B.lock)return;
+  const target=event.target.closest('[data-fr]');if(!target||!fireRedActive()||S.screen==='battle'&&B.lock)return;
   if(target.dataset.fr==='fight'){FR.fight=true;render();}
   else if(target.dataset.fr==='back')back();
  });

@@ -6,6 +6,9 @@
 /* Trainer and remaining count shown above the scene. */
 .react-interface p:has(+ .react-battle-stage.fr-battle){display:block!important;width:100%;margin:0 0 8px!important;text-align:center;font:400 20px/1.2 'Jersey 10',monospace!important;color:var(--r-text)}
 
+/* The engine log stays in the page for history and tests; the text box shows the current line. */
+.fr-battle>.battle-log{display:none!important}
+
 /* Arena */
 .fr-battle .fr-frame>.arena.battle-classic{position:absolute!important;inset:0 0 auto 0!important;width:100%!important;height:calc(var(--u)*168)!important;max-height:none!important;min-height:0!important;aspect-ratio:auto!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;container-type:normal!important;background-size:cover!important;background-position:center 62%!important}
 .fr-battle .battle-mon{position:absolute!important;max-width:none!important;max-height:none!important;width:calc(var(--u)*96)!important;height:calc(var(--u)*96)!important;z-index:2}
@@ -42,7 +45,7 @@
 .fr-textbox{position:absolute;left:0;right:0;bottom:0;height:calc(var(--u)*72);display:flex;background:#283848;border-top:calc(var(--u)*2) solid #182028}
 .fr-message{flex:0 0 calc(var(--u)*176);box-sizing:border-box;margin:calc(var(--u)*4);padding:calc(var(--u)*7) calc(var(--u)*10);border:calc(var(--u)*2.5) solid #d8683c;border-radius:calc(var(--u)*5);background:#304860;box-shadow:inset 0 0 0 calc(var(--u)*1.5) #f0c8a0}
 .fr-message.is-wide{flex:1}
-.fr-message p{margin:0;color:#fff;font:400 calc(var(--fp)*10)/1.4 'Jersey 10',monospace;text-shadow:calc(var(--u)*1) calc(var(--u)*1) 0 #50586a;white-space:pre-wrap}
+.react-interface .fr-battle .fr-message p{margin:0;opacity:1!important;color:#fff!important;font:400 calc(var(--fp)*10)/1.4 'Jersey 10',monospace!important;text-shadow:calc(var(--u)*1) calc(var(--u)*1) 0 #50586a;white-space:pre-wrap}
 .fr-menu{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:1fr;margin:calc(var(--u)*4) calc(var(--u)*4) calc(var(--u)*4) 0;padding:calc(var(--u)*5) calc(var(--u)*6);background:#f8f8f8;border:calc(var(--u)*2.5) solid #706890;border-radius:calc(var(--u)*5);box-shadow:inset 0 0 0 calc(var(--u)*1.5) #c8c0e0}
 .fr-cmd{display:flex;align-items:center;gap:calc(var(--u)*3);padding:0 calc(var(--u)*2);background:none;border:0;color:#303030;font:400 calc(var(--fp)*10)/1 'Jersey 10',monospace;text-align:left;cursor:pointer;min-height:0;border-radius:calc(var(--u)*3)}
 .fr-cmd small{display:block;margin-top:calc(var(--u)*1);font-size:calc(var(--fps)*10);font-weight:400;color:#606878}
@@ -86,3 +89,40 @@
 .fr-overlay-body p{margin:0 0 calc(var(--u)*4);font-size:calc(var(--fps)*10)}
 
 @media(prefers-reduced-motion:reduce){.fr-battle .hp>i{transition:none!important}}
+
+/* Doubles: enemies at the back on the right with their boxes stacked top-left; the player's two
+   Pokémon in front on the left with their boxes stacked bottom-right, as in FireRed. */
+.fr-battle .fr-frame>.handheld-arena{position:absolute!important;inset:0 0 auto 0!important;width:100%!important;height:calc(var(--u)*168)!important;max-height:none!important;min-height:0!important;aspect-ratio:auto!important;padding:0!important;margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;display:block!important;background-size:cover!important;background-position:center 62%!important;overflow:hidden}
+.fr-battle .handheld-ground{display:block!important;position:absolute!important;border:0!important;box-shadow:none!important;border-radius:50%!important;background:radial-gradient(ellipse at center,#0000002e 0 55%,transparent 70%)!important;z-index:1;transform:none!important}
+.fr-battle .handheld-ground.enemy-ground{left:calc(var(--u)*180)!important;top:calc(var(--u)*72)!important;width:calc(var(--u)*176)!important;height:calc(var(--u)*26)!important;right:auto!important;bottom:auto!important}
+.fr-battle .handheld-ground.player-ground{left:0!important;top:calc(var(--u)*148)!important;width:calc(var(--u)*204)!important;height:calc(var(--u)*28)!important;right:auto!important;bottom:auto!important}
+.fr-battle .handheld-mon{display:contents!important}
+.fr-battle .handheld-sprite{position:absolute!important;z-index:2;width:calc(var(--u)*88)!important;height:calc(var(--u)*88)!important;max-width:none!important;max-height:none!important;margin:0!important;transform:none!important}
+.fr-battle .handheld-mon.enemy .handheld-sprite{width:calc(var(--u)*80)!important;height:calc(var(--u)*80)!important}
+.fr-battle .handheld-mon.enemy.position-0 .handheld-sprite{left:calc(var(--u)*188)!important;top:calc(var(--u)*4)!important}
+.fr-battle .handheld-mon.enemy.position-1 .handheld-sprite{left:calc(var(--u)*268)!important;top:0!important;z-index:1}
+.fr-battle .handheld-mon.player .handheld-sprite{top:auto!important;bottom:0!important;width:calc(var(--u)*96)!important;height:calc(var(--u)*96)!important;overflow:hidden;z-index:3}
+.fr-battle .handheld-mon.player.position-0 .handheld-sprite{left:calc(var(--u)*6)!important}
+.fr-battle .handheld-mon.player.position-1 .handheld-sprite{left:calc(var(--u)*92)!important}
+.fr-battle .handheld-sprite .art{position:relative!important;width:100%!important;height:100%!important;aspect-ratio:auto!important}
+.fr-battle .handheld-sprite .art img{image-rendering:pixelated}
+.fr-battle .handheld-sprite.fr-gba .art img{position:absolute!important;left:0!important;top:calc(var(--u)*var(--fr-drop,0))!important;width:100%!important;height:100%!important;object-fit:contain}
+.fr-battle .handheld-mon.fainted .handheld-sprite{opacity:.2}
+.react-interface .fr-battle .handheld-status{position:absolute!important;z-index:4;box-sizing:border-box;margin:0!important;padding:calc(var(--u)*3) calc(var(--u)*6) calc(var(--u)*4)!important;background:#f8f8e0!important;color:#303030!important;border:calc(var(--u)*2) solid #405040!important;border-radius:calc(var(--u)*6) calc(var(--u)*2) calc(var(--u)*6) calc(var(--u)*2)!important;box-shadow:calc(var(--u)*2) calc(var(--u)*2) 0 #40504066!important;width:calc(var(--u)*140)!important;min-width:0!important;max-width:none!important;transform:none!important;font-family:'Jersey 10',monospace!important}
+.react-interface .fr-battle .handheld-mon.enemy.position-0 .handheld-status{left:calc(var(--u)*6)!important;top:calc(var(--u)*6)!important;right:auto!important;bottom:auto!important}
+.react-interface .fr-battle .handheld-mon.enemy.position-1 .handheld-status{left:calc(var(--u)*16)!important;top:calc(var(--u)*40)!important;right:auto!important;bottom:auto!important}
+.react-interface .fr-battle .handheld-mon.player.position-0 .handheld-status{left:calc(var(--u)*206)!important;top:calc(var(--u)*90)!important;right:auto!important;bottom:auto!important;width:calc(var(--u)*148)!important}
+.react-interface .fr-battle .handheld-mon.player.position-1 .handheld-status{left:calc(var(--u)*212)!important;top:calc(var(--u)*129)!important;right:auto!important;bottom:auto!important;width:calc(var(--u)*144)!important}
+.react-interface .fr-battle .handheld-status strong{display:flex;justify-content:space-between;gap:calc(var(--u)*4);margin:0!important;font:400 calc(var(--fps)*10)/1 'Jersey 10',monospace!important;color:#303030!important;white-space:nowrap;overflow:hidden}
+.react-interface .fr-battle .handheld-status strong small{font:inherit!important;color:inherit!important}
+.fr-battle .handheld-status .battle-types{display:none!important}
+.react-interface .fr-battle .handheld-status .hp{position:relative;width:auto!important;height:calc(var(--u)*5)!important;margin:calc(var(--u)*3) 0 0 calc(var(--u)*20)!important;background:#506058!important;border:calc(var(--u)*1.5) solid #384838!important;border-radius:calc(var(--u)*3)!important;overflow:visible}
+.fr-battle .handheld-status .hp::before{content:'HP';position:absolute;right:100%;top:50%;transform:translateY(-50%);margin-right:calc(var(--u)*3);padding:0 calc(var(--u)*2);font:400 calc(var(--fps)*10)/1 'Jersey 10',monospace;color:#f8d040;background:#405040;border-radius:calc(var(--u)*2)}
+.fr-battle .handheld-status .hp>i{height:100%;border:0!important;border-radius:calc(var(--u)*2)}
+.react-interface .fr-battle .handheld-status>small{display:block;margin-top:calc(var(--u)*2);text-align:right;font:400 calc(var(--fps)*10)/1 'Jersey 10',monospace!important;color:#303030!important}
+.react-interface .fr-battle .handheld-mon.enemy .handheld-status>small:empty{display:none}
+
+/* Online heading above the scene */
+.react-interface .pvp-heading:has(+ .react-battle-stage.fr-battle){display:flex;justify-content:center;align-items:baseline;gap:12px;margin:0 0 8px}
+.react-interface .pvp-heading:has(+ .react-battle-stage.fr-battle) h2{margin:0}
+.react-interface .pvp-heading:has(+ .react-battle-stage.fr-battle) :is(h2,span){font:400 20px/1.2 'Jersey 10',monospace!important}

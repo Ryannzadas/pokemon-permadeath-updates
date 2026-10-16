@@ -1,9 +1,9 @@
 // The existing engine remains authoritative for actions and available targets.
 import {fireRedActive,presentFireRed,fitFireRed} from './battle-firered';
 export function battleNavigation(){
- if(S.screen==='multiplayer')return window.socialBattleNavigation?.()||[];
+ // Battles show these commands in the FireRed menu instead of the sidebar.
+ if(S.screen==='multiplayer')return fireRedActive()?[]:window.socialBattleNavigation?.()||[];
  if(S.screen!=='battle'||!B)return null;
- // Single battles show these commands in the FireRed menu instead of the sidebar.
  return fireRedActive()?[]:commandItems();
 }
 function commandItems(){
@@ -24,7 +24,7 @@ export function layoutBattle(){
  const controls=document.createElement('div');controls.className='react-battle-choices';
  while(stage.nextSibling)controls.appendChild(stage.nextSibling);
  stage.appendChild(controls);
- if(fireRedActive()){presentFireRed(stage,commandItems());return;}
+ if(fireRedActive()){presentFireRed(stage,S.screen==='multiplayer'?window.socialBattleNavigation?.()||[]:commandItems());return;}
  if(log)requestAnimationFrame(()=>{if(log.isConnected)log.scrollTop=log.scrollHeight;});
 }
 export function fitBattle(){
