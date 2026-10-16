@@ -17,10 +17,12 @@
   if(S.screen==='multiplayer'&&action==='socialBack')return true;
   return S.screen==='intro'&&B?.preview&&action==='cancelTrainer';
  }
+ // The shop always reopens on its first category: Pokébolas in Classic, Suprimentos in Permadeath.
+ const firstShopTab=()=>R?.mode==='classic'?'balls':'general';
  const toggleShop=ACT.shop;
  ACT.shop=()=>{
   if(S.screen!=='hub'||EVOLVING)return;
-  if(!S.shop){S.shopTab='general';S.shopQuery='';S.shopPage=0;S.shopQty={};S.sel=null;}
+  if(!S.shop){S.shopTab=firstShopTab();S.shopQuery='';S.shopPage=0;S.shopQty={};S.sel=null;}
   toggleShop();
  };
  const editable=target=>target instanceof Element&&target.closest('input,textarea,[contenteditable="true"]');

@@ -63,7 +63,7 @@
  const oldHub=rHub;
  rHub=()=>{
   let html=oldHub();if(R.mode!=='classic')return html;
-  if(S.shop){const nav=I.categories.map(id=>button('shopTab',labels[id],id)).join('');html=html.replace(/<nav class="shop-tabs"[\s\S]*?<\/nav>/,`<nav class="shop-tabs" aria-label="Categorias da loja">${nav}</nav>`);return html;}
+  if(S.shop){const nav=[...I.categories.filter(id=>id!=='general'),'general'].map(id=>button('shopTab',labels[id],id)).join('');html=html.replace(/<nav class="shop-tabs"[\s\S]*?<\/nav>/,`<nav class="shop-tabs" aria-label="Categorias da loja">${nav}</nav>`);return html;}
   const bag=`<section class="panel"><h2>Mochila</h2>${I.categories.filter(cat=>owned(cat).length).map(cat=>`<details><summary>${labels[cat]} · ${owned(cat).length}</summary><div class="grid">${owned(cat).map(id=>['healing','general'].includes(cat)?button('sel',`${ITEMS[id].ico} ${esc(ITEMS[id].n)} ×${R.bag[id]}`,id):`<div class="inventory-name">${ITEMS[id].ico}<span>${esc(ITEMS[id].n)} ×${R.bag[id]}</span></div>`).join('')}</div></details>`).join('')||'<p>Mochila vazia.</p>'}</section>`;
   html=html.replace(/<section class="panel"><h2>Mochila<\/h2>[\s\S]*?<\/section>/,bag).replace(/<section class="panel"><h2>Relíquias<\/h2>[\s\S]*?<\/section>/,'');return html;
  };

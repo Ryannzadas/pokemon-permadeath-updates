@@ -25,8 +25,8 @@ const server=http.createServer((req,res)=>{const f=path.resolve(root,'.'+new URL
  await p.locator('.react-sidebar button').filter({hasText:'Jornada',exact:true}).click();
  assert.equal(await p.evaluate(()=>S.shop),false);
  await p.evaluate(()=>{ACT.shop();render();});
- assert.deepEqual(await p.evaluate(()=>[S.shopTab,S.shopQuery,S.shopPage,Object.keys(S.shopQty).length]),['general','',0,0]);
- await p.evaluate(()=>{ACT.shopTab('tm');ACT.shop();ACT.shop();render();});assert.equal(await p.evaluate(()=>S.shopTab),'general');
+ assert.deepEqual(await p.evaluate(()=>[S.shopTab,S.shopQuery,S.shopPage,Object.keys(S.shopQty).length]),['balls','',0,0]);
+ await p.evaluate(()=>{ACT.shopTab('tm');ACT.shop();ACT.shop();render();});assert.equal(await p.evaluate(()=>S.shopTab),'balls');
  await p.evaluate(()=>{ACT.shop();ACT.center();render();});assert.equal(await p.evaluate(()=>musTrackId),'pokeCenter');
  await p.evaluate(()=>{ACT.centerExit();ACT.camp();render();});assert.notEqual(await p.evaluate(()=>musTrackId),'pokeCenter');
  await p.evaluate(()=>{ACT.campExit();render();});
