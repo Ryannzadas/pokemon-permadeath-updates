@@ -165,6 +165,8 @@ app.whenReady().then(async()=>{
   register('social:request',async(op,arg)=>{if(!user||!configured())throw new Error('Entre na sua conta para jogar online.');return socialRequest(config,await token(),op,arg,serverURL);});
   register('account:configure',async()=>{await requireTitle();if(user)throw new Error('Saia da conta antes de mudar o Firebase.');const result=await dialog.showOpenDialog(win,{properties:['openFile'],filters:[{name:'Configuração Firebase',extensions:['json']}]});if(!result.canceled){const c=validateConfig(JSON.parse(fs.readFileSync(result.filePaths[0],'utf8')));atomicWrite(path.join(home(),'firebase-config.json'),JSON.stringify(c));config=c;cloud=new FirebaseCloud(c);message='Firebase configurado. Você já pode entrar com Google.';notify();}return status();});
   updates=createUpdateController({updater:require('electron-updater').autoUpdater,onChange:notify,currentVersion:app.getVersion(),enabled:false});
+  // Full screen for the game window (F11 or the game options); returns the resulting state.
+  register('window:fullscreen',flag=>{if(typeof flag==='boolean'&&win)win.setFullScreen(flag);return !!win?.isFullScreen();});
   register('update:check',()=>{updates.check();return status();});
   register('update:download',()=>{updates.download();return status();});
   register('update:install',async()=>{

@@ -1,6 +1,6 @@
 {
   "name": "pokemon-permadeath-visual-test",
-  "version": "0.4.1-test.11",
+  "version": "0.4.1-test.12",
   "description": "Pokemon Permadeath para Windows com progresso local e conta Google",
   "private": true,
   "main": "desktop/main.cjs",

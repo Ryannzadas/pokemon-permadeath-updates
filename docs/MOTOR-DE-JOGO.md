@@ -5,7 +5,7 @@ O jogo está saindo de uma interface HTML/CSS ("site") para uma camada de jogo e
 ## Decisões
 
 - **Escopo híbrido.** Tudo que é jogo roda em Phaser: batalha, jornada, menus, mochila, equipe e mapas. Login, Team Builder e administração de ligas continuam em HTML, como janelas com visual de jogo.
-- **Resolução interna 480×270 (16:9)**, em pixel art, com zoom inteiro (2×, 3×, 4×) e bordas escuras quando sobra espaço.
+- **Resolução interna 480×270 (16:9)**, em pixel art. Por padrão o jogo preenche a janela; a opção "Pixels perfeitos" usa zoom inteiro nos pixels reais da tela (considerando a escala do Windows). F11 alterna a tela cheia (canal `window:fullscreen` do Electron).
 - **As regras não são reescritas.** O motor de regras (`game.js`, `expansion.js` e modelos) continua sendo a autoridade. As cenas só apresentam o estado e enviam comandos.
 - **Os saves não mudam.**
 
@@ -22,6 +22,8 @@ O jogo está saindo de uma interface HTML/CSS ("site") para uma camada de jogo e
 | `ui/engine/assets.js` | Carregamento de imagens, medição de pixels dos sprites e sprite de espécie (FireRed ou comum) |
 | `ui/engine/scenes/battle-scene.js` | Batalhas da jornada: selvagem, treinador, treino, exploração e duplas |
 | `ui/engine/scenes/menu-scenes.js` | Título, modo, continuar, personagem, nome (campo HTML sobre o jogo) e inicial |
+| `ui/engine/scenes/screen-base.js` | Base das telas de menu (reconstrução por estado, janelas, cabeçalho, mensagens) |
+| `ui/engine/scenes/panel-scenes.js` | Janelas do jogo sobre o título ou a jornada: Opções e Coleção |
 | `ui/engine/scenes/journey-scenes.js` | Menu da jornada, apresentação do treinador e resultados (vitória, derrota, campeão) |
 
 O build (`npm run build:ui`) gera `game/engine.js`. O Phaser vem de `game/vendor` como global.

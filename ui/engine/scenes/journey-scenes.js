@@ -6,56 +6,12 @@ import { WIDTH, HEIGHT, TEXT, COLORS, hpColor } from '../config.js';
 import { pixelText, drawWindow, Menu, Typewriter } from '../ui.js';
 import { command, engineOptions } from '../bridge.js';
 import { ensureTexture, addSpecies } from '../assets.js';
+import { defineScreenScene, iconScale, money } from './screen-base.js';
 
 const GOLD = '#e3bd69';
-const money = n => '₽ ' + Number(n || 0).toLocaleString('pt-BR');
-const iconScale = sp => window.FRLG_SPRITES?.[SP[sp]?.dex] ? 0.5 : 1 / 3;
 
 export function defineJourneyScenes(engine) {
-  class Base extends Phaser.Scene {
-    constructor(key) { super(key); this.engine = engine; }
-    create() {
-      this.root = this.add.container(0, 0);
-      this.key = '';
-      this.events.on('wake', () => { this.key = ''; this.cameras.main.fadeIn(160, 16, 20, 24); this.sync(); });
-      this.events.on('sleep', () => { this.teardown(); this.key = ''; });
-      this.cameras.main.fadeIn(160, 16, 20, 24);
-      this.sync();
-    }
-    update() { engine.input.pollGamepads(); }
-    sync() {
-      if (!this.root || this.sys.isSleeping()) return;
-      const key = JSON.stringify(this.stateKey());
-      if (key === this.key) return;
-      this.key = key; this.teardown(); this.build();
-    }
-    teardown() { this.menu?.destroy(); this.menu = null; this.typer?.destroy(); this.typer = null; this.root?.removeAll(true); }
-    win(x, y, w, h, style = 'menu') {
-      const g = this.add.graphics(); this.root.add(g);
-      if (style === 'message') drawWindow(g, x, y, w, h, { fill: COLORS.messageFill, border: COLORS.messageBorder, inner: COLORS.messageInner, radius: 5 });
-      else drawWindow(g, x, y, w, h, { fill: COLORS.menuFill, border: COLORS.menuBorder, inner: COLORS.menuInner, radius: 5 });
-      return g;
-    }
-    message(text, y = HEIGHT - 56, h = 52) {
-      this.win(4, y, WIDTH - 8, h, 'message');
-      const t = pixelText(this, 16, y + 8, '', { size: TEXT.large, color: COLORS.white, shadow: COLORS.shadowLight, width: WIDTH - 32 });
-      this.root.add(t); this.typer = new Typewriter(this, t); this.typer.show(text, { speed: CFG.speed || 1 });
-    }
-    cover(key, url, dim = 0.45) {
-      const bg = this.add.image(WIDTH / 2, HEIGHT / 2, '__DEFAULT').setVisible(false); this.root.add(bg);
-      ensureTexture(this, key, url, () => { if (!bg.active) return; const s = this.textures.get(key).getSourceImage(); bg.setTexture(key).setScale(Math.max(WIDTH / s.width, HEIGHT / s.height)).setVisible(true); });
-      this.root.add(this.add.rectangle(0, 0, WIDTH, HEIGHT, 0x0c1418, dim).setOrigin(0));
-    }
-    image(key, url, x, y, { originY = 1, scale = 1 } = {}) {
-      const img = this.add.image(x, y, '__DEFAULT').setOrigin(0.5, originY).setVisible(false); this.root.add(img);
-      ensureTexture(this, key, url, () => { if (img.active) img.setTexture(key).setScale(scale).setVisible(true); });
-      return img;
-    }
-    hpBar(c, x, y, w, mon) {
-      const ratio = Math.max(0, mon.hp / mon.maxHp);
-      c.add(this.add.graphics().fillStyle(COLORS.barBorder, 1).fillRoundedRect(x - 1, y - 1, w + 2, 6, 2).fillStyle(COLORS.barTrack, 1).fillRect(x, y, w, 4).fillStyle(hpColor(ratio), 1).fillRect(x, y, w * ratio, 4));
-    }
-  }
+  const Base = defineScreenScene(engine);
 
   // ---------- Journey menu ----------
   class HubScene extends Base {
@@ -115,6 +71,7 @@ export function defineJourneyScenes(engine) {
       items.push(
         { label: 'DESAFIOS', onSelect: () => command('daily') },
         { label: 'TEAM BUILDER', onSelect: () => command('teams') },
+        { label: 'OPÇÕES', onSelect: () => engine.openWindow('options') },
         { label: 'MENU', onSelect: () => command('accountTitle') },
         { label: 'ABANDONAR', textColor: '#b83838', onSelect: () => command('abandon') },
       );
@@ -123,7 +80,7 @@ export function defineJourneyScenes(engine) {
       this.root.add(this.menu.container);
 
       const info = trainer ? `Próximo desafio: ${trainer.name} · ${trainer.type ? TYPES[trainer.type]?.[0] : 'Tipos variados'} · ${trainer.team.length} Pokémon${boss ? ' · disponível agora' : ''}` : boss ? next.title : `Próxima batalha: ${R.battle + 1}`;
-      this.message(S.msg || info, HEIGHT - 56, 52);
+      this.message(S.msg || info, { y: HEIGHT - 56, h: 52 });
       if (trainer && !S.msg) this.image('leader:' + trainer.sprite, `assets/trainers/${trainer.sprite}.png`, WIDTH - 40, HEIGHT - 6, { scale: 0.6 });
     }
   }
@@ -200,7 +157,7 @@ export function defineJourneyScenes(engine) {
       this.root.add(this.menu.container);
       const rewards = opts.filter(o => o.action === 'reward').length;
       const prompt = R?.pending ? `Equipe cheia: escolha quem sai para ficar com ${nm(R.pending)}.` : rewards ? `Escolha 1 de ${rewards} recompensas.` : items.length > 1 ? 'Escolha uma opção.' : 'Continue quando quiser.';
-      this.message(prompt, HEIGHT - 56, 52);
+      this.message(prompt, { y: HEIGHT - 56, h: 52 });
     }
   }
 

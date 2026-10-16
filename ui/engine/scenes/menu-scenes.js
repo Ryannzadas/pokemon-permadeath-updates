@@ -5,56 +5,14 @@ import { WIDTH, HEIGHT, TEXT, COLORS } from '../config.js';
 import { pixelText, drawWindow, Menu, Typewriter } from '../ui.js';
 import { command } from '../bridge.js';
 import { ensureTexture, addSpecies } from '../assets.js';
+import { defineScreenScene } from './screen-base.js';
 
 const GOLD = '#e3bd69';
 const typeName = t => TYPES[t]?.[0] || t;
 const typeColor = t => TYPES[t]?.[1] || '#a8a878';
 
 export function defineMenuScenes(engine) {
-  class ScreenScene extends Phaser.Scene {
-    constructor(key) { super(key); this.engine = engine; }
-    create() {
-      this.root = this.add.container(0, 0);
-      this.key = '';
-      this.events.on('wake', () => { this.key = ''; this.cameras.main.fadeIn(160, 16, 20, 24); this.sync(); });
-      this.events.on('sleep', () => { this.teardown(); this.key = ''; });
-      this.cameras.main.fadeIn(160, 16, 20, 24);
-      this.sync();
-    }
-    update() { engine.input.pollGamepads(); }
-    // Phaser only counts a scene as active after create(); a sleeping scene must not redraw.
-    sync() {
-      if (!this.root || this.sys.isSleeping()) return;
-      const key = JSON.stringify(this.stateKey());
-      if (key === this.key) return;
-      this.key = key;
-      this.teardown();
-      this.build();
-    }
-    teardown() { this.menu?.destroy(); this.menu = null; this.typer?.destroy(); this.typer = null; this.overlay?.remove(); this.overlay = null; this.root?.removeAll(true); }
-    // Shared pieces
-    backdrop(color = 0x20303c) { this.root.add(this.add.rectangle(0, 0, WIDTH, HEIGHT, color).setOrigin(0)); }
-    header(title, kicker) {
-      const g = this.add.graphics(); this.root.add(g);
-      g.fillStyle(COLORS.panelHead, 1).fillRect(0, 0, WIDTH, 30).fillStyle(0x285878, 1).fillRect(0, 30, WIDTH, 2);
-      this.root.add(pixelText(this, 12, 5, title, { size: TEXT.large, color: '#ffffff', shadow: '#285878' }));
-      if (kicker) this.root.add(pixelText(this, WIDTH - 12, 10, kicker, { size: TEXT.small, color: '#e8f4fb' }).setOrigin(1, 0));
-    }
-    message(text, { y = HEIGHT - 52, h = 48 } = {}) {
-      const g = this.add.graphics(); this.root.add(g);
-      drawWindow(g, 4, y, WIDTH - 8, h, { fill: COLORS.messageFill, border: COLORS.messageBorder, inner: COLORS.messageInner, radius: 5 });
-      const t = pixelText(this, 16, y + 8, '', { size: TEXT.large, color: COLORS.white, shadow: COLORS.shadowLight, width: WIDTH - 32 });
-      this.root.add(t);
-      this.typer = new Typewriter(this, t); this.typer.show(text, { speed: CFG.speed || 1 });
-    }
-    hint(text) { this.root.add(pixelText(this, WIDTH - 8, HEIGHT - 12, text, { size: TEXT.small, color: '#c8d0d8' }).setOrigin(1, 0)); }
-    card(c, x, y, w, h, focused, disabled) {
-      const g = this.add.graphics(); c.add(g);
-      g.fillStyle(disabled ? 0xd8d8d0 : 0xf8f8f0, 1).fillRoundedRect(x, y, w, h, 5);
-      g.lineStyle(focused && !disabled ? 2 : 1, focused && !disabled ? COLORS.messageBorder : 0x8890a0, 1).strokeRoundedRect(x, y, w, h, 5);
-      return g;
-    }
-  }
+  const ScreenScene = defineScreenScene(engine);
 
   // ---------- Title ----------
   class TitleScene extends ScreenScene {
@@ -74,10 +32,10 @@ export function defineMenuScenes(engine) {
         saves && { label: 'CONTINUAR', onSelect: () => command('cont') },
         { label: saves ? 'NOVO JOGO' : 'JOGAR', onSelect: () => command('start') },
         doubles && { label: 'PÓS-GAME EM DUPLAS', onSelect: () => command('openDouble') },
-        { label: 'COLEÇÃO', onSelect: () => command('visualCollection') },
+        { label: 'COLEÇÃO', onSelect: () => engine.openWindow('collection') },
         { label: 'JOGAR COM AMIGOS', onSelect: () => command('social') },
         { label: 'TEAM BUILDER', onSelect: () => command('teams') },
-        { label: 'CONFIGURAÇÕES', onSelect: () => command('visualOptions') },
+        { label: 'OPÇÕES', onSelect: () => engine.openWindow('options') },
         // Account and profile are an HTML window (typing and sign-in) shown over the game.
         { label: 'PERFIL', onSelect: () => { document.querySelector('.profile-toggle')?.click(); render(); } },
       ].filter(Boolean);

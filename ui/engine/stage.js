@@ -14,9 +14,12 @@ export function createStage() {
   return host;
 }
 
+// Zoom in physical screen pixels, so Windows display scaling (125%, 150%) still gives whole-pixel
+// art. Filling the window is the default; CFG.fill === false keeps whole-pixel zoom with borders.
 export function fitZoom() {
-  const fit = Math.min(innerWidth / WIDTH, innerHeight / HEIGHT);
-  return fit >= 1 ? Math.floor(fit) : fit;
+  const dpr = window.devicePixelRatio || 1, fit = Math.min(innerWidth / WIDTH, innerHeight / HEIGHT);
+  if (window.CFG?.fill !== false || fit * dpr < 1) return fit;
+  return Math.floor(fit * dpr) / dpr;
 }
 
 export function showStage(host, visible) {

@@ -23,11 +23,12 @@ export function drawWindow(g, x, y, w, h, { fill, border, inner, radius = 4, sha
 // Grid menu with a ▶ cursor. Items: { label, sub, disabled, color, textColor, onSelect, onFocus }.
 // Keyboard/gamepad move between enabled items; the mouse hovers and clicks them.
 export class Menu {
-  constructor(scene, { x, y, columns = 1, cellW, cellH, items, input, onBack, cursor = true, drawCell, rows = Infinity }) {
+  constructor(scene, { x, y, columns = 1, cellW, cellH, items, input, onBack, cursor = true, drawCell, rows = Infinity, index }) {
     Object.assign(this, { scene, x, y, columns, cellW, cellH, items, input, onBack, cursor, drawCell, rows });
     this.offset = 0; // first visible row when the list is longer than `rows`
     this.container = scene.add.container(0, 0);
-    this.index = Math.max(0, items.findIndex(i => !i.disabled));
+    // Start on the requested item (e.g. where the cursor was before a redraw) when it can be selected.
+    this.index = index !== undefined && items[index] && !items[index].disabled ? index : Math.max(0, items.findIndex(i => !i.disabled));
     this.render();
     this.release = input.push(action => this.handle(action));
   }

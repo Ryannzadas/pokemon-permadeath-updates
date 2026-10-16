@@ -27,12 +27,25 @@ let browser;
   const labels = scene => page.evaluate(k => GameEngine.game.scene.getScene(k).menu?.items.map(i => i.label), scene);
 
   await on('title', 'title');
-  assert.deepEqual(await labels('title'), ['JOGAR', 'COLEÇÃO', 'JOGAR COM AMIGOS', 'TEAM BUILDER', 'CONFIGURAÇÕES', 'PERFIL']);
-  // Panels that are still HTML hand the screen back, and X/back returns to the Phaser title.
+  assert.deepEqual(await labels('title'), ['JOGAR', 'COLEÇÃO', 'JOGAR COM AMIGOS', 'TEAM BUILDER', 'OPÇÕES', 'PERFIL']);
+  // Collection and Options are game windows over the title; X returns to it.
   await key('ArrowDown'); await key('z');
-  await page.waitForFunction(() => GameEngine.active === null && document.body.dataset.visualPanel === 'collection');
-  await page.evaluate(() => { ACT.visualHome(); render(); });
+  await page.waitForFunction(() => GameEngine.active === 'collection');
+  await key('x'); await on('title', 'title');
+  for (let i = 0; i < 4; i++) await key('ArrowDown');
+  await key('z');
+  await page.waitForFunction(() => GameEngine.active === 'options');
+  const speed = await page.evaluate(() => CFG.speed || 1);
+  await key('ArrowDown'); await key('ArrowDown'); await key('ArrowRight');
+  assert.notEqual(await page.evaluate(() => CFG.speed || 1), speed);
+  await key('x'); await on('title', 'title');
+  // Screens that are still HTML (Team Builder) take over and hand back to the Phaser title.
+  await page.evaluate(() => { GameEngine.game.scene.getScene('title').menu.focus(3); });
+  await key('z');
+  await page.waitForFunction(() => GameEngine.active === null && S.screen === 'teams');
+  await page.evaluate(() => { S.screen = 'title'; ACT.visualHome(); render(); });
   await on('title', 'title');
+  for (let i = 0; i < 3; i++) await key('ArrowUp');
 
   await key('z'); await on('mode', 'modeSelect');
   await key('x'); await on('title', 'title');
@@ -69,6 +82,6 @@ let browser;
   assert.equal((await labels('title'))[0], 'CONTINUAR');
 
   assert.deepEqual(errors, []);
-  console.log('PASS engine menus: title options and HTML panels handoff, mode/character/name/starter by keyboard, back steps, name validation and field, generation switching, journey starts with chosen name, Continue with a save.');
+  console.log('PASS engine menus: title options, collection and options windows, HTML handoff, mode/character/name/starter by keyboard, back steps, name validation and field, generation switching, journey starts with chosen name, Continue with a save.');
   await browser.close(); server.close();
 })().catch(async e => { console.error(e); await browser?.close(); server.close(); process.exit(1); });

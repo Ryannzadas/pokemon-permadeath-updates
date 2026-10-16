@@ -1,6 +1,14 @@
 # Pokémon Permadeath — teste das telas aprovadas
 
-Versão **0.4.1-test.11**.
+Versão **0.4.1-test.12**.
+
+## Novidades da test.12
+
+- O jogo preenche a janela por padrão (sem bordas largas); F11 ou Opções → Tela cheia deixa sem borda nenhuma e é lembrado.
+- Zoom correto com escala do Windows (125%, 150%).
+- Opções e Coleção viraram janelas do jogo, abertas pelo título e pela jornada (item OPÇÕES).
+
+## test.11
 
 ## Novidades da test.11
 

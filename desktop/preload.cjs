@@ -8,6 +8,7 @@ contextBridge.exposeInMainWorld('desktopAPI',{
     setItem:(key,value)=>{if(!allowed.has(key))throw new Error('Chave inválida.');const response=ipcRenderer.sendSync('store:write',{key,value:String(value)});if(!response?.ok)throw new Error(response?.error||'Falha ao salvar.');slots[key]=String(value);},
     removeItem:key=>{if(!allowed.has(key))return;const response=ipcRenderer.sendSync('store:write',{key,value:null});if(!response?.ok)throw new Error(response?.error||'Falha ao salvar.');delete slots[key];}
   },
+  fullScreen:flag=>ipcRenderer.invoke('window:fullscreen',flag),
   checkUpdates:()=>ipcRenderer.invoke('update:check'),
   downloadUpdate:()=>ipcRenderer.invoke('update:download'),
   installUpdate:()=>ipcRenderer.invoke('update:install'),
