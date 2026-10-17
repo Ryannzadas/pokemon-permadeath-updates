@@ -32,6 +32,18 @@ let browser;
   await key('ArrowDown'); await key('z');
   await page.waitForFunction(() => GameEngine.active === 'collection');
   await key('x'); await on('title', 'title');
+  // Every collection choice opens its screen and comes back to the Collection window.
+  for (const [index, screen, scene] of [[0, 'dex', 'dex'], [1, 'journal', 'journal'], [3, 'daily', 'list'], [4, 'savedJourneys', 'list'], [5, 'memorial', 'list']]) {
+    await page.evaluate(() => GameEngine.game.scene.getScene('title').menu.focus(1)); await key('z');
+    await page.waitForFunction(() => GameEngine.active === 'collection');
+    await page.evaluate(i => GameEngine.game.scene.getScene('collection').menu.focus(i), index);
+    await key('z');
+    await page.waitForFunction(([s, k]) => S.screen === s && GameEngine.active === k, [screen, scene]);
+    // Back returns to the Collection window, and X there to the title.
+    await key('x');
+    await page.waitForFunction(() => S.screen === 'title' && GameEngine.active === 'collection');
+    await key('x'); await on('title', 'title');
+  }
   for (let i = 0; i < 4; i++) await key('ArrowDown');
   await key('z');
   await page.waitForFunction(() => GameEngine.active === 'options');

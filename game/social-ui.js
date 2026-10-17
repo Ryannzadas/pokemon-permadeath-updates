@@ -65,7 +65,7 @@
  ACT.pvpItemTarget=v=>{battleChoice.target=Number(v);if(battleChoice.id==='ether')battleMenu='itemMove';else selectAction({...battleChoice});};
  ACT.pvpItemMove=id=>selectAction({...battleChoice,move:id});
  ACT.submitTurn=()=>{if(!match||busy||playing||match.pending||match.winner)return;const chosen=match.slots.map((index,i)=>replacement()&&match.team[index].hp>0?{kind:'wait'}:actions[i]);if(chosen.some(a=>!a)){notice='Escolha a ação de cada Pokémon.';return;}const current=match;perform(async()=>setMatch(await request('action',{id:current.id,turn:current.turn,commandId:crypto.randomUUID(),actions:chosen})));};
- ACT.forfeitBattle=()=>{if(confirm('Desistir desta batalha?'))perform(async()=>{match=await request('forfeit',{id:match.id});});};
+ ACT.forfeitBattle=async()=>{const ok=window.GameDialogs?await GameDialogs.confirm('A partida conta como derrota.',{title:'Desistir desta batalha?',confirmLabel:'Desistir',cancelLabel:'Continuar lutando'}):confirm('Desistir desta batalha?');if(ok)perform(async()=>{match=await request('forfeit',{id:match.id});});};
  ACT.onlineStatus=v=>perform(async()=>{await request('hello',{status:v});await refresh();});
  ACT.createLeague=()=>{S.screen='leagueCreate';};
  ACT.saveLeague=()=>{const name=document.getElementById('league-name')?.value,format=document.getElementById('league-format')?.value,settings=rules();perform(async()=>{const out=await request('createLeague',{name,format,rules:settings});await openLeague(out.id);});};
@@ -85,6 +85,25 @@
  function spriteEffect(side,index){return effect?.side===side&&effect.index===index?`<span class="battle-effect ${esc(effect.kind)}" aria-hidden="true">${esc(effect.symbol||'✦')}</span>`:'';}
  function arenaMon(m,i,side,index){return `<article class="handheld-mon ${side} position-${i} ${m.hp<=0?'fainted':''}"><div class="handheld-sprite${spriteClass(side,index)}">${art(m,side==='player')}${spriteEffect(side,index)}</div><div class="handheld-status"><strong>${esc(SP[m.sp].n)} <small>Nv. ${m.lvl}</small></strong><div class="battle-types">${types(m)}</div>${hpBar(m)}<small>${side==='player'?`HP ${m.hp}/${m.maxHp}`:''}${m.ailment?' · '+esc(m.ailment):''}</small></div></article>`;}
  function singleArena(view){const p=view.team[view.slots[0]],e=view.enemy[view.enemySlots[0]];if(!p||!e)return '';return `<div class="arena battle-classic"><div class="battle-platform enemy-platform"></div><div class="battle-platform player-platform"></div><div class="battle-status enemy-status plate"><div class="nm">${esc(SP[e.sp].n)} · Nv. ${e.lvl}</div><div class="battle-types">${types(e)}</div>${hpBar(e)}</div><div class="battle-mon enemy-mon${spriteClass('enemy',view.enemySlots[0])} ${e.hp<=0?'fainted':''}">${art(e)}${spriteEffect('enemy',view.enemySlots[0])}</div><div class="battle-mon player-mon${spriteClass('player',view.slots[0])} ${p.hp<=0?'fainted':''}">${art(p,true)}${spriteEffect('player',view.slots[0])}</div><div class="battle-status player-status plate"><div class="nm">${esc(SP[p.sp].n)} · Nv. ${p.lvl}</div><div class="battle-types">${types(p)}</div>${hpBar(p)}<div class="battle-hp">HP ${p.hp}/${p.maxHp}</div></div></div>`;}
+ // Online battle as data for the Phaser battle scene: what to draw (the replayed frame while a turn
+ // plays) and what the player can choose now. Choices are the same pvp* actions as the HTML client.
+ window.OnlineBattle=Object.freeze({state(){
+  if(!match||S.screen!=='multiplayer')return null;
+  const view=displayMatch||match,slot=Math.min(battleSlot,match.slots.length-1),index=match.slots[slot],m=match.team[index],forced=replacement();
+  const taken=(i)=>actions.some((a,j)=>j!==slot&&a?.kind==='switch'&&a.target===i);
+  const available=m?m.moves.filter(id=>m.pp[id]>0&&(!m.choiceMove||id===m.choiceMove)):[];
+  const status=playing?(replayText||'O turno começou!'):match.winner?match.winner==='won'?'Você venceu!':match.winner==='lost'?'Você perdeu.':'Empate.':busy?'Enviando ação…':match.pending?'Aguardando o outro treinador…':forced&&m?.hp>0?'Aguardando a troca do adversário…':match.log.at(-1)||'A batalha começou!';
+  return {id:match.id,turn:match.turn,double:match.rules.format==='double',level:match.rules.level,league:!!match.league,
+   team:view.team,enemy:view.enemy,slots:view.slots,enemySlots:view.enemySlots,effect,status,notice,
+   waiting:!!(match.winner||match.pending||playing||busy||(forced&&m?.hp>0)),winner:match.winner||null,
+   menu:m?.hp<=0?'pokemon':battleMenu,slot,actor:index,count:match.slots.length,chosen:actions.filter(Boolean).length,
+   moves:(available.length?m.moves:['struggle']).map(id=>({id,disabled:available.length>0&&!available.includes(id)})),
+   bag:Object.entries(match.bag).filter(([,n])=>n>0).map(([id,n])=>({id,n,disabled:n<=actions.filter((a,i)=>i!==slot&&a?.kind==='item'&&a.id===id).length})),
+   bench:match.team.map((p,i)=>({i,p})).filter(({p,i})=>p.hp>0&&!match.slots.includes(i)&&!taken(i)).map(({i})=>i),
+   targets:match.enemySlots.filter(i=>match.enemy[i].hp>0),
+   choice:battleChoice,itemTargets:match.team.map((p,i)=>({i,disabled:battleChoice?.id==='max-revive'?p.hp>0:p.hp<=0})),
+   retry:!!(notice&&actions.some(Boolean))};
+ }});
  window.socialBattleNavigation=()=>{
   if(!match)return [];
   const actor=match.team[match.slots[Math.min(battleSlot,match.slots.length-1)]];

@@ -5,6 +5,8 @@
 // whichever scene asked first, and every caller (from any scene) is told when it is ready.
 // Files load through an always-running loader scene: a scene that goes to sleep pauses its own
 // loader, which would leave images requested just before a screen change waiting forever.
+// The National Dex of online battles is a global constant of the page (not on window).
+const onlineDex = () => typeof OnlineDex !== 'undefined' ? OnlineDex : null;
 const waiting = new Map();
 function loader(scene) { const s = scene.game.scene.getScene('assets-loader'); return s?.sys.isActive() ? s : scene; }
 function loadOnce(scene, key, kind, queue, done) {
@@ -41,9 +43,9 @@ export function pixelBounds(scene, key) {
 
 // Front/back sprite for a species: FireRed/LeafGreen art (#1-386) or the regular sprite.
 export function speciesSprite(sp, back = false) {
-  const dex = SP[sp]?.dex;
+  const dex = (SP[sp]?.dex ?? onlineDex()?.species?.[sp]?.dex);
   if (window.FRLG_SPRITES?.[dex]) return { key: `frlg:${dex}-${back ? 'b' : 'f'}`, url: `assets/sprites-frlg/${dex}-${back ? 'b' : 'f'}.png`, frlg: true };
-  const url = SPRITE(dex, back);
+  const url = SP[sp] ? SPRITE(dex, back) : onlineDex()?.sprite(sp, back) || SPRITE(dex, back);
   return { key: `spr:${url}`, url, frlg: false };
 }
 
@@ -64,7 +66,7 @@ export function addSpecies(scene, container, sp, x, ground, { back = false, room
 
 // Menu icon (Gen VII, 40x30) for party lists; falls back to a shrunken battle sprite.
 export function addIcon(scene, container, sp, x, ground, fallbackScale = 0.5) {
-  const dex = SP[sp]?.dex;
+  const dex = (SP[sp]?.dex ?? onlineDex()?.species?.[sp]?.dex);
   if (!window.POKEMON_ICONS?.has(dex)) return addSpecies(scene, container, sp, x, ground, { scale: fallbackScale });
   const key = `icon:${dex}`, img = scene.add.image(x, ground, '__DEFAULT').setOrigin(0.5, 1).setVisible(false);
   container?.add(img);

@@ -7,6 +7,7 @@
  ACT.routeWalk=()=>{if(S.screen==='routes'){S.screen='routeWorld';selected=false;}};
  ACT.routeWorldBack=()=>{if(S.screen==='routeWorld'){CampWorld.destroy();S.screen='routes';selected=false;persist();}};
  ACT.routeDiscovery=()=>{if(S.screen!=='routeWorld')return;const scene=CampWorld.debug().scene;if(!scene?.player||Math.hypot(scene.player.x-320,scene.player.y-185)>60)return;const j=JourneyModel.normalize(R);selected=true;S.msg='';render();};
+ ACT.routeClose=()=>{if(S.screen==='routeWorld')selected=false;};
  ACT.routeObserve=()=>{if(S.screen!=='routeWorld'||!selected)return;const j=JourneyModel.normalize(R),key=R.battle+':'+j.route;if(j.walkDiscovery!==key){j.walkDiscovery=key;const species=JourneyModel.routes[j.route].species;JourneyModel.observe(R,species);dexRecord(species);j.events++;j.log.push('Você observou '+SP[species].n+' no caminho.');j.log=j.log.slice(-8);CollectionModel.daily(META).events++;saveMeta();}selected=false;S.msg='Observação registrada.';persist();render();};
  ACT.routeWild=()=>{if(S.screen!=='routeWorld')return;CampWorld.destroy();S.screen='hub';S.shop=false;if(R.battle%5===4&&!R.endless)ACT.explore();else startBattle(false);render();};
  const oldRoutes=ACT.routes;ACT.routes=()=>{oldRoutes();};

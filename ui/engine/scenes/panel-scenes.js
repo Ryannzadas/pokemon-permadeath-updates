@@ -75,7 +75,8 @@ export function definePanelScenes(engine) {
       ];
       this.menu = new Menu(this, {
         x: 14, y: 40, columns: 3, cellW: 152, cellH: 88, input: engine.input,
-        items: cards.map(c => ({ ...c, onSelect: () => command(...c.act) })),
+        // The window steps aside for the chosen screen and comes back when that screen closes.
+        items: cards.map(c => ({ ...c, onSelect: () => { engine.leaveWindow(); command(...c.act); } })),
         onBack: () => engine.closeWindow(),
         drawCell: (c, item, x, y, focused) => {
           this.card(c, x, y, 146, 82, focused);

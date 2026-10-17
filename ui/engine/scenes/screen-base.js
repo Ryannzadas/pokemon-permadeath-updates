@@ -1,7 +1,7 @@
 // Base for menu-like screens: rebuilds from engine state when its key changes, and offers the
 // shared pieces (backdrop, header, windows, message box, cards, images, HP bars).
 import { WIDTH, HEIGHT, TEXT, COLORS, hpColor } from '../config.js';
-import { pixelText, drawWindow, Typewriter } from '../ui.js';
+import { pixelText, drawWindow, Typewriter, Menu } from '../ui.js';
 import { ensureTexture } from '../assets.js';
 
 export const iconScale = sp => window.FRLG_SPRITES?.[SP[sp]?.dex] ? 0.5 : 1 / 3;
@@ -50,6 +50,15 @@ export function defineScreenScene(engine) {
       const t = pixelText(this, 16, y + 8, '', { size: TEXT.large, color: COLORS.white, shadow: COLORS.shadowLight, width: WIDTH - 32 });
       this.root.add(t);
       this.typer = new Typewriter(this, t); this.typer.show(text, { speed: CFG.speed || 1 });
+    }
+    // A small window with choices over the screen; closes with X.
+    popup({ x, y, w, items, onClose, cellH = 22 }) {
+      const layer = this.add.container(0, 0); this.root.add(layer);
+      const g = this.add.graphics(); layer.add(g);
+      drawWindow(g, x, y, w, items.length * cellH + 12, { fill: COLORS.menuFill, border: COLORS.menuBorder, inner: COLORS.menuInner, radius: 5 });
+      const menu = new Menu(this, { x: x + 6, y: y + 6, columns: 1, cellW: w - 12, cellH, items, input: engine.input, onBack: onClose });
+      layer.add(menu.container);
+      return { destroy() { menu.destroy(); layer.destroy(true); } };
     }
     hint(text) { this.root.add(pixelText(this, WIDTH - 8, HEIGHT - 12, text, { size: TEXT.small, color: '#c8d0d8' }).setOrigin(1, 0)); }
     card(c, x, y, w, h, focused, disabled) {

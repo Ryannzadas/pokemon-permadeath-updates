@@ -1,8 +1,45 @@
 # Pokémon Permadeath — teste das telas aprovadas
 
-Versão **0.4.1-test.13**.
+Versão **0.4.1-test.18**.
 
-## Novidades da test.13
+## Novidades da test.18
+
+- Etapa 5 do motor de jogo: as batalhas online (Social e ligas) agora são desenhadas pelo mesmo motor das batalhas da jornada, no estilo FireRed, com teclado/controle: LUTAR, MOCHILA, POKÉMON e DESISTIR; golpes com tipo e PP; alvo nas duplas; troca obrigatória; o turno é animado evento por evento.
+- Estádio como cenário das batalhas online; Pokémon de todas as gerações (Pokédex nacional) com nome e sprite.
+- Enquanto espera o outro treinador, X volta ao Social (a partida continua online); no fim, Z ou X volta.
+- Desistir usa a janela de confirmação do jogo, não a do navegador.
+
+## test.17
+
+- Etapa 4 do motor de jogo: Acampamento, Centro Pokémon e a caminhada pelo caminho agora rodam dentro do próprio jogo, em tela cheia, com a câmera seguindo o treinador (sem a página com barra lateral).
+- Z (ou Enter/Espaço/E) fala com um Pokémon, com a enfermeira, abre o PC ou observa no marco; X (ou Esc) abre um menu para sair, continuar ou, no caminho, encontrar um Pokémon selvagem.
+- Janelas do jogo para brincar/dar lanche no acampamento (com a barra de amizade), para a enfermeira recuperar a equipe e para observar a espécie do caminho.
+- A escolha de caminho (Floresta, Caverna, Lago) também virou tela do jogo.
+
+## test.16
+
+- Voltar (X) de Pokédex, Diário, Conquistas, Desafios, Jornadas clássicas ou Memorial volta para a janela Coleção, não para o menu principal.
+- Golpe novo (nível, TM/HM ou evolução) entra direto nos golpes se houver espaço livre; com 4 golpes, fica em Aprendidos.
+- O Perfil abre ao lado, com a tela do jogo escurecida ao fundo (sem o layout antigo).
+- Cursor do mouse em pixel art: seta e mãozinha sobre o que é clicável.
+
+## test.15
+
+- Correção: na janela Coleção, escolher Pokédex, Diário, Conquistas, Desafios, Jornadas clássicas ou Memorial abre a tela na hora (antes ela só aparecia depois de apertar X).
+
+## test.14
+
+- Fase 3 do motor de jogo concluída: Equipe, Sumário, Mochila, Loja, PC, Pokédex e Diário agora são telas do jogo, no estilo FireRed e navegáveis pelo teclado/controle.
+- Mochila: categorias, item com descrição, uso em um Pokémon (e escolha do golpe para Ether) com volta à lista.
+- Loja: janela de quantidade como no Poké Mart (▲▼ ±1, ◀▶ ±10).
+- PC: equipe e caixa lado a lado (depositar, retirar, sumário) e a caixa de equipes campeãs.
+- Sumário em páginas (◀ ▶): info e habilidade, status, golpes, aprender (reequipar golpes, TM/HM), item equipado e evolução.
+- Missões, evento entre batalhas, desafios diários, memorial, jornadas clássicas e escolha após a Liga também viraram telas do jogo.
+- Líderes animados como nos GIFs originais; notificações e confirmações com janelas do jogo.
+- Social, Team Builder, ligas e Perfil continuam em HTML, mas com o visual do jogo (barra azul, janelas creme, fonte do jogo).
+- Correção: ao abrir o jogo direto do arquivo, o ajuste de escala podia rodar antes do motor iniciar.
+
+## test.13
 
 - Textos nítidos em qualquer tamanho de janela: o jogo é desenhado na resolução real da tela.
 - Ícones oficiais de menu dos Pokémon (PokéAPI, offline) nas listas da jornada, batalha, resultado e continuar.

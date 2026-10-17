@@ -42,5 +42,11 @@
  ACT.bagTab=c=>{if(order.includes(c)||c==='all')S.bagTab=c;};
  // Reopening the bag starts on "Todos", like the shop starts on its first category.
  const openBag=ACT.visualBag;ACT.visualBag=(...args)=>{S.bagTab='all';return openBag(...args);};
- window.BagView=Object.freeze({html});
+ // Data for the Phaser bag scene: the same entries, categories and usable items as the HTML view.
+ function data(){
+  const usable=new Set([...document.querySelectorAll('#app [data-act="sel"]')].map(b=>b.dataset.v));
+  const all=entries(),cats=order.filter(c=>all.some(e=>e.cat===c));
+  return {entries:all.map(e=>({...e,usable:usable.has(e.id),hint:hints[e.cat]||''})),categories:cats.map(c=>({id:c,label:labels[c]})),tab:cats.includes(S.bagTab)?S.bagTab:'all'};
+ }
+ window.BagView=Object.freeze({html,data});
 })();

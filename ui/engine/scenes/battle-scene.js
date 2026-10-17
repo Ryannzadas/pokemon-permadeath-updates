@@ -1,10 +1,14 @@
-// Journey battles (wild, trainer, gym, training, exploration; singles and doubles) drawn in Phaser.
-// The scene is a projection of the engine state (R, S, B): every engine render() calls sync(),
-// which updates sprites, status boxes, messages and menus. Player choices go back as commands.
+// Battles drawn in Phaser: journey battles (wild, trainer, gym, training, exploration; singles and
+// doubles) and online battles (Social and leagues). The scene is a projection of a battle source:
+// every engine render() calls sync(), which updates sprites, status boxes, messages and menus.
+// Player choices go back as the source's own commands. journeySource reads R/S/B and the journey's
+// buttons; onlineSource reads OnlineBattle.state() from the online client.
 import { WIDTH, HEIGHT, TEXT, COLORS, hpColor } from '../config.js';
 import { pixelText, drawWindow, Menu, Typewriter } from '../ui.js';
 import { command, engineOptions, enginePrompt } from '../bridge.js';
 import { ensureTexture, pixelBounds, addIcon } from '../assets.js';
+// The National Dex of online battles is a global constant of the page (not on window).
+const onlineDex = () => typeof OnlineDex !== 'undefined' ? OnlineDex : null;
 
 const ARENA_H = 198;
 const BOX_Y = ARENA_H;
@@ -18,13 +22,149 @@ const SPOTS = {
   double: { enemy: [{ x: 318, ground: 102 }, { x: 414, ground: 94 }], player: [{ x: 84, ground: ARENA_H }, { x: 200, ground: ARENA_H }] },
 };
 
+// Names and dex numbers work for journey species (SP) and National Dex species from online battles.
+const monName = m => SP[m.sp]?.n || onlineDex()?.species?.[m.sp]?.n || m.sp;
+const dexOf = sp => SP[sp]?.dex ?? onlineDex()?.species?.[sp]?.dex;
+const itemIcon = id => /src="([^"]+)"/.exec(ITEMS[id]?.ico || '')?.[1] || '';
+const onlineMoveName = id => onlineDex()?.moveName(id) || M[id]?.n || id;
+
+// ---------- journey battles ----------
+const journeySource = {
+  online: false, exp: true,
+  active: () => S.screen === 'battle' && !!B,
+  key: () => B,
+  arena: () => window.battleArenaName?.() || 'Floresta',
+  sides() {
+    const layout = B.double ? 'double' : 'single';
+    const enemy = (B.enemySlots?.length ? B.enemySlots : [0]).map(i => B.enemies?.[i] || B.enemy).filter(Boolean);
+    const player = (B.playerSlots?.length ? B.playerSlots : [R.active]).map(i => R.team[i]).filter(Boolean);
+    return { layout, enemy, player, enemyIds: enemy, playerIds: player };
+  },
+  // B.fx is 'e' (enemy hit) or 'p' (player hit) while the engine shows the impact; B.visual floats
+  // a move, status or stat symbol over a Pokémon.
+  flash: () => B.fx ? { token: B.fx, side: B.fx } : null,
+  visual: () => B.visual ? { token: B.visual, id: B.visual.mon, text: B.visual.text, kind: B.visual.kind } : null,
+  effKnown: () => !B.double,
+  actor: () => R.team[B.double ? B.playerSlots[Math.min(B.commands.length, B.playerSlots.length - 1)] : B.playerSlots?.[0] ?? R.active],
+  actorKey: () => B.double ? B.commands.length : 0,
+  mode(fight) {
+    if (B.lock) return 'message';
+    const forced = !!B.forced;
+    if (!forced && B.menu === 'target') return 'target';
+    if (forced || B.menu !== 'moves') return 'overlay';
+    return fight ? 'fight' : 'command';
+  },
+  menuKey: () => B.menu,
+  options(mode) {
+    return mode === 'fight' ? engineOptions('.react-battle-choices .moves .mv')
+      : mode === 'target' ? engineOptions('.react-battle-choices [data-act="target"]')
+      : mode === 'overlay' ? engineOptions('.react-battle-choices button') : [];
+  },
+  message(mode) { return mode === 'message' ? (B.log?.at(-1) || '') : mode === 'command' ? `O que ${monName(this.actor())} vai fazer?` : enginePrompt(); },
+  commands() {
+    const items = window.battleCommandItems?.() || [], find = (action, value) => items.find(c => c.action === action && (value === undefined || c.value === value));
+    const bag = find('menu', 'bag'), ball = find('menu', 'ball'), party = find('menu', 'switch'), flee = find('flee');
+    return [
+      // Wild battles reach Poké Balls through the bag, as in FireRed.
+      { label: 'MOCHILA', disabled: !bag || bag.disabled && !(ball && !ball.disabled), onSelect: () => command('menu', bag && !bag.disabled ? 'bag' : 'ball') },
+      { label: 'POKÉMON', disabled: !party || party.disabled, onSelect: () => command('menu', 'switch') },
+      flee ? { label: B.train ? 'SAIR' : 'FUGIR', sub: B.train ? '' : String(flee.label).split('·')[1]?.trim(), disabled: flee.disabled, onSelect: () => command('flee') } : { label: '', disabled: true },
+    ];
+  },
+  targetBack: () => engineOptions('.react-battle-choices [data-act="menu"]')[0],
+  overlay(options) {
+    const titles = { bag: 'Mochila', ball: 'Pokébolas', switch: 'Pokémon', itemTarget: 'Mochila', itemMove: 'Mochila' };
+    const isBack = o => o.action === 'menu' && o.label.startsWith('Voltar');
+    const ball = (window.battleCommandItems?.() || []).find(c => c.value === 'ball');
+    return {
+      title: B.forced ? 'Pokémon' : titles[B.menu] || '',
+      hint: { bag: 'Usar qual item?', ball: 'Usar qual Pokébola?', switch: 'Escolha um Pokémon.', itemTarget: 'Usar em qual Pokémon?', itemMove: 'Restaurar PP de qual golpe?' }[B.menu],
+      back: options.filter(isBack).at(-1), list: options.filter(o => !isBack(o)),
+      tabs: ['bag', 'ball'].includes(B.menu) && ball ? [['bag', 'Itens'], ['ball', 'Pokébolas']].map(([v, label]) => ({ label, active: B.menu === v, onSelect: () => command('menu', v) })) : null,
+      partyMon: o => ['sw', 'inventoryTarget'].includes(o.action) ? R.team[Number(o.value)] : null,
+    };
+  },
+};
+
+// ---------- online battles (Social, leagues) ----------
+const online = () => window.OnlineBattle?.state();
+const onlineSource = {
+  online: true, exp: false,
+  active: () => S.screen === 'multiplayer' && !!online(),
+  key: () => online().id,
+  arena: () => 'Estádio',
+  // Each replayed frame brings new objects, so Pokémon are identified by side and team index.
+  sides() {
+    const s = online();
+    return { layout: s.double ? 'double' : 'single', enemy: s.enemySlots.map(i => s.enemy[i]), player: s.slots.map(i => s.team[i]),
+      enemyIds: s.enemySlots.map(i => 'enemy:' + i), playerIds: s.slots.map(i => 'player:' + i) };
+  },
+  // The turn replay plays one event at a time: 'hit' flashes the Pokémon, other kinds float a symbol.
+  flash: () => { const e = online().effect; return e?.kind === 'hit' ? { token: e, side: e.side === 'enemy' ? 'e' : 'p' } : null; },
+  visual: () => { const e = online().effect; return e && e.kind !== 'hit' ? { token: e, id: `${e.side}:${e.index}`, text: e.symbol, kind: e.kind } : null; },
+  effKnown: () => false,
+  actor: () => { const s = online(); return s.team[s.actor]; },
+  actorKey: () => { const s = online(); return `${s.turn}:${s.slot}:${s.chosen}`; },
+  mode(fight) {
+    const s = online();
+    if (s.waiting) return 'message';
+    if (s.menu === 'target') return 'target';
+    if (['pokemon', 'bag', 'itemTarget', 'itemMove'].includes(s.menu)) return 'overlay';
+    return fight ? 'fight' : 'command';
+  },
+  menuKey: () => online().menu,
+  options(mode) {
+    const s = online(), m = s.team[s.actor];
+    if (mode === 'fight') return s.moves.map(({ id, disabled }) => {
+      const mv = OnlineDex.moves[id];
+      return { action: 'pvpMove', value: id, label: onlineMoveName(id), disabled, color: TYPES[mv.t]?.[1] || '#a8a878',
+        sub: `${TYPES[mv.t]?.[0] || ''} · ${mv.cat === 1 ? 'Status' : 'poder ' + (mv.p || 'variável')} · PP ${id === 'struggle' ? '—' : (m.pp[id] ?? mv.pp) + '/' + mv.pp}` };
+    });
+    if (mode === 'target') return s.targets.map(i => ({ action: 'pvpTarget', value: i, label: monName(s.enemy[i]) }));
+    if (mode !== 'overlay') return [];
+    const ether = s.team[s.choice?.target];
+    const list = s.menu === 'pokemon' ? s.bench.map(i => ({ action: 'pvpSwitch', value: i, label: monName(s.team[i]) }))
+      : s.menu === 'bag' ? s.bag.map(b => ({ action: 'pvpItem', value: b.id, label: ITEMS[b.id]?.n || b.id, sub: `×${b.n}`, disabled: b.disabled, icon: itemIcon(b.id) }))
+      : s.menu === 'itemTarget' ? s.itemTargets.map(t => ({ action: 'pvpItemTarget', value: t.i, label: monName(s.team[t.i]), disabled: t.disabled }))
+      : (ether?.moves || []).map(id => ({ action: 'pvpItemMove', value: id, label: onlineMoveName(id), sub: `PP ${ether.pp[id]}/${OnlineDex.moves[id].pp}`, disabled: ether.pp[id] >= OnlineDex.moves[id].pp }));
+    // A fainted Pokémon must be replaced: no way back from that list.
+    return m?.hp > 0 ? list.concat([{ action: 'pvpMenu', value: 'main', label: 'Voltar' }]) : list;
+  },
+  message(mode) {
+    const s = online(), m = s.team[s.actor], name = m ? monName(m) : '';
+    if (mode === 'message') return s.status;
+    if (mode === 'command') return `O que ${name} vai fazer?` + (s.count > 1 ? ` (${s.chosen + 1}/${s.count})` : '');
+    if (mode === 'target') return `Usar ${onlineMoveName(s.choice?.id)} em quem?`;
+    return { pokemon: m?.hp <= 0 ? `${name} desmaiou. Escolha outro.` : 'Trocar gasta a ação deste Pokémon.', bag: 'Usar qual item?', itemTarget: 'Usar em qual Pokémon?', itemMove: 'Restaurar PP de qual golpe?' }[s.menu] || '';
+  },
+  commands() {
+    const s = online();
+    return [
+      { label: 'MOCHILA', disabled: !s.bag.some(b => !b.disabled), onSelect: () => command('pvpMenu', 'bag') },
+      { label: 'POKÉMON', disabled: !s.bench.length, onSelect: () => command('pvpMenu', 'pokemon') },
+      { label: 'DESISTIR', onSelect: () => command('forfeitBattle') },
+    ];
+  },
+  targetBack: () => ({ action: 'pvpMenu', value: 'main' }),
+  overlay(options) {
+    const s = online(), isBack = o => o.action === 'pvpMenu';
+    return {
+      title: { pokemon: 'Pokémon', bag: 'Mochila', itemTarget: 'Mochila', itemMove: 'Mochila' }[s.menu] || '',
+      hint: '', back: options.filter(isBack).at(-1), list: options.filter(o => !isBack(o)), tabs: null,
+      partyMon: o => ['pvpSwitch', 'pvpItemTarget'].includes(o.action) ? s.team[Number(o.value)] : null,
+    };
+  },
+};
+const SOURCES = [journeySource, onlineSource];
+export const battleOwnsScreen = () => SOURCES.some(src => src.active());
+
 // Defined on demand: Phaser is a global that only exists in the real game page.
 export const defineBattleScene = () => class BattleScene extends Phaser.Scene {
   constructor(engine) { super('battle'); this.engine = engine; }
 
   create() {
     this.bounds = new Map();           // texture key -> visible pixel box
-    this.mons = new Map();             // slot key -> { sprite, box, hp, mon }
+    this.mons = new Map();             // slot key -> { sprite, box, hp, mon, id }
     this.ui = null; this.uiKey = '';
     this.fight = false; this.moveIndex = 0; this.actorKey = null;
     this.bg = this.add.image(WIDTH / 2, ARENA_H / 2, '__DEFAULT').setDisplaySize(WIDTH, ARENA_H);
@@ -46,8 +186,11 @@ export const defineBattleScene = () => class BattleScene extends Phaser.Scene {
 
   // ---------- state -> scene ----------
   sync() {
-    if (!this.layerUi || this.sys.isSleeping() || !B) return;
-    if (this.battle !== B) { this.battle = B; this.fight = false; this.moveIndex = 0; this.resetField(); }
+    const src = SOURCES.find(s => s.active());
+    if (!this.layerUi || this.sys.isSleeping() || !src) return;
+    this.src = src;
+    const key = src.key();
+    if (this.battle !== key) { this.battle = key; this.fight = false; this.moveIndex = 0; this.uiKey = ''; this.resetField(); }
     this.syncArena();
     this.syncField();
     this.syncUi();
@@ -60,39 +203,33 @@ export const defineBattleScene = () => class BattleScene extends Phaser.Scene {
   }
 
   syncArena() {
-    const name = window.battleArenaName?.() || 'Floresta', key = 'arena:' + name;
+    const name = this.src.arena(), key = 'arena:' + name;
     if (this.arenaKey === key) return;
     this.arenaKey = key;
     this.ensureTexture(key, `assets/visual/${name}.webp`, () => { if (this.arenaKey === key) this.bg.setTexture(key).setDisplaySize(WIDTH, ARENA_H); });
   }
 
-  sides() {
-    const layout = B.double ? 'double' : 'single';
-    const enemy = (B.enemySlots?.length ? B.enemySlots : [0]).map(i => B.enemies?.[i] || B.enemy).filter(Boolean);
-    const player = (B.playerSlots?.length ? B.playerSlots : [R.active]).map(i => R.team[i]).filter(Boolean);
-    return { layout, enemy, player };
-  }
-
   syncField() {
-    const { layout, enemy, player } = this.sides(), seen = new Set();
-    const place = (side, mon, slot) => {
+    const { layout, enemy, player, enemyIds, playerIds } = this.src.sides(), seen = new Set();
+    const place = (side, mon, slot, id) => {
       const key = `${side}:${slot}`; seen.add(key);
       let entry = this.mons.get(key);
-      if (!entry || entry.mon !== mon) { entry?.sprite.destroy(); entry?.box.destroy(); entry = this.createMon(side, mon, slot, layout); this.mons.set(key, entry); }
+      if (!entry || entry.id !== id || entry.sp !== mon.sp) { entry?.sprite.destroy(); entry?.box.destroy(); entry = this.createMon(side, mon, slot, layout); entry.id = id; this.mons.set(key, entry); }
+      entry.mon = mon;
       this.updateMon(entry, side, mon, slot, layout);
     };
-    enemy.forEach((m, i) => place('enemy', m, i));
-    player.forEach((m, i) => place('player', m, i));
+    enemy.forEach((m, i) => place('enemy', m, i, enemyIds[i]));
+    player.forEach((m, i) => place('player', m, i, playerIds[i]));
     for (const [key, entry] of this.mons) if (!seen.has(key)) { entry.sprite.destroy(); entry.box.destroy(); this.mons.delete(key); }
     this.entering = false;
     this.playEffects();
   }
 
   spriteInfo(mon, back) {
-    const dex = SP[mon.sp]?.dex;
+    const dex = dexOf(mon.sp);
     if (window.FRLG_SPRITES?.[dex]) return { key: `frlg:${dex}-${back ? 'b' : 'f'}`, url: `assets/sprites-frlg/${dex}-${back ? 'b' : 'f'}.png`, scale: 2 };
     // Regular (DS-era) sprites are doubled when the Pokémon fits, so sizes match the FireRed ones.
-    const url = SPRITE(dex, back);
+    const url = SP[mon.sp] ? SPRITE(dex, back) : onlineDex().sprite(mon.sp, back);
     return { key: `spr:${url}`, url, scale: 'fit' };
   }
 
@@ -115,7 +252,7 @@ export const defineBattleScene = () => class BattleScene extends Phaser.Scene {
       if (enter) this.tweens.add({ targets: sprite, x: { from: side === 'enemy' ? WIDTH + 60 : -60, to: spot.x }, duration: 420, ease: 'Cubic.out' });
     });
     const box = this.add.container(0, 0); this.layerStatus.add(box);
-    return { sprite, box, hp: mon.hp, mon, side, slot, fainted: mon.hp <= 0 };
+    return { sprite, box, hp: mon.hp, mon, sp: mon.sp, side, slot, fainted: mon.hp <= 0 };
   }
 
   statusLayout(side, slot, layout) {
@@ -125,7 +262,7 @@ export const defineBattleScene = () => class BattleScene extends Phaser.Scene {
 
   updateMon(entry, side, mon, slot, layout) {
     // Redraw the status box only when what it shows changed, so the HP bar animation can finish.
-    const boxKey = [nm(mon), mon.lvl, mon.hp, mon.maxHp, mon.ailment, mon.xp | 0, mon.alpha, layout, slot].join('|');
+    const boxKey = [monName(mon), mon.lvl, mon.hp, mon.maxHp, mon.ailment, mon.xp | 0, mon.alpha, layout, slot].join('|');
     if (boxKey === entry.boxKey) return;
     entry.boxKey = boxKey;
     const L = this.statusLayout(side, slot, layout), box = entry.box;
@@ -133,7 +270,7 @@ export const defineBattleScene = () => class BattleScene extends Phaser.Scene {
     const g = this.add.graphics(); box.add(g);
     drawWindow(g, L.x, L.y, L.w, L.h, { fill: COLORS.statusFill, border: COLORS.statusBorder, radius: 5, shadow: COLORS.statusShadow });
     const nameSize = TEXT.large;
-    box.add(pixelText(this, L.x + 8, L.y + 3, nm(mon) + (mon.alpha ? ' ★' : ''), { size: nameSize }));
+    box.add(pixelText(this, L.x + 8, L.y + 3, monName(mon) + (mon.alpha ? ' ★' : ''), { size: nameSize }));
     box.add(pixelText(this, L.x + L.w - 8, L.y + 3, `Nv${mon.lvl}`, { size: nameSize }).setOrigin(1, 0));
     if (mon.ailment) box.add(pixelText(this, L.x + 8, L.y + L.h - 13, String(mon.ailment).toUpperCase().slice(0, 3), { size: TEXT.small, color: '#c03028' }));
     const barY = L.y + (nameSize === TEXT.large ? 24 : 15), barX = L.x + 34, barW = L.w - 44;
@@ -144,7 +281,7 @@ export const defineBattleScene = () => class BattleScene extends Phaser.Scene {
     box.add(fill);
     if (entry.hp !== mon.hp) this.tweens.add({ targets: fill, width: barW * ratio, duration: 400 / (CFG.speed || 1), ease: 'Linear', onUpdate: () => fill.setFillStyle(hpColor(fill.width / barW)) });
     if (L.numbers) box.add(pixelText(this, L.x + L.w - 8, barY + 6, `${Math.max(0, mon.hp)}/ ${mon.maxHp}`, { size: L.compact ? TEXT.small : TEXT.large }).setOrigin(1, 0));
-    if (L.exp) {
+    if (L.exp && this.src.exp) {
       const ey = L.y + L.h - 9, ew = L.w - 44;
       box.add(pixelText(this, L.x + 8, ey - 4, 'EXP', { size: TEXT.small, color: '#405040' }));
       box.add(this.add.graphics().fillStyle(COLORS.barTrack, 1).fillRect(L.x + 34, ey, ew, 3).fillStyle(COLORS.exp, 1).fillRect(L.x + 34, ey, ew * Math.min(1, (mon.xp | 0) / xpNeed(mon.lvl)), 3));
@@ -155,18 +292,19 @@ export const defineBattleScene = () => class BattleScene extends Phaser.Scene {
     entry.hp = mon.hp;
   }
 
-  monEntry(mon) { for (const e of this.mons.values()) if (e.mon === mon) return e; return null; }
+  monEntry(id) { for (const e of this.mons.values()) if (e.id === id) return e; return null; }
 
   playEffects() {
-    // Hit flash: B.fx is 'e' (enemy hit) or 'p' (player hit) while the engine shows the impact.
-    if (B.fx && B.fx !== this.lastFx) {
-      for (const e of this.mons.values()) if ((B.fx === 'e') === (e.side === 'enemy') && e.sprite.visible) this.tweens.add({ targets: e.sprite, alpha: 0.1, duration: 60, yoyo: true, repeat: 2 });
+    // Hit flash on the side that was hit ('e' enemy, 'p' player), once per impact.
+    const flash = this.src.flash();
+    if (flash && flash.token !== this.lastFx) {
+      for (const e of this.mons.values()) if ((flash.side === 'e') === (e.side === 'enemy') && e.sprite.visible) this.tweens.add({ targets: e.sprite, alpha: 0.1, duration: 60, yoyo: true, repeat: 2 });
     }
-    this.lastFx = B.fx;
-    // Move, status and stat effects (B.visual) float a symbol over the right Pokémon.
-    const v = B.visual;
-    if (v && v !== this.lastVisual) {
-      const e = this.monEntry(v.mon);
+    this.lastFx = flash?.token;
+    // Move, status and stat effects float a symbol over the right Pokémon.
+    const v = this.src.visual();
+    if (v && v.token !== this.lastVisual) {
+      const e = this.monEntry(v.id);
       if (e) {
         const t = pixelText(this, e.sprite.x, e.sprite.y - e.sprite.displayHeight * 0.6, v.text || '✦', { size: TEXT.large, color: fxColor[v.kind] || '#ffffff', shadow: '#202020' }).setOrigin(0.5);
         this.layerFx.add(t);
@@ -174,37 +312,26 @@ export const defineBattleScene = () => class BattleScene extends Phaser.Scene {
         if (v.kind === 'buff' || v.kind === 'debuff') this.tweens.add({ targets: e.sprite, y: e.sprite.y + (v.kind === 'buff' ? -4 : 4), duration: 120, yoyo: true, repeat: 1 });
       }
     }
-    this.lastVisual = v;
+    this.lastVisual = v?.token;
   }
 
   // ---------- text box, menus and overlays ----------
-  actor() { return R.team[B.double ? B.playerSlots[Math.min(B.commands.length, B.playerSlots.length - 1)] : B.playerSlots?.[0] ?? R.active]; }
-
-  mode() {
-    if (B.lock) return 'message';
-    const forced = !!B.forced;
-    if (!forced && B.menu === 'target') return 'target';
-    if (forced || B.menu !== 'moves') return 'overlay';
-    return this.fight ? 'fight' : 'command';
-  }
-
   syncUi() {
-    const actorKey = B.double ? B.commands.length : 0;
+    const src = this.src, actorKey = src.actorKey();
     if (actorKey !== this.actorKey) { this.actorKey = actorKey; this.fight = false; this.moveIndex = 0; }
-    if (B.lock) this.fight = false;
-    const mode = this.mode();
-    const options = mode === 'fight' ? engineOptions('.react-battle-choices .moves .mv')
-      : mode === 'target' ? engineOptions('.react-battle-choices [data-act="target"]')
-      : mode === 'overlay' ? engineOptions('.react-battle-choices button') : [];
-    const commands = mode === 'command' ? window.battleCommandItems?.() || [] : [];
-    const message = mode === 'message' ? (B.log?.at(-1) || '') : mode === 'command' ? `O que ${nm(this.actor())} vai fazer?` : enginePrompt();
-    const key = JSON.stringify([mode, B.menu, options.map(o => [o.action, o.value, o.label, o.sub, o.disabled]), commands.map(c => [c.action, c.value, c.disabled, c.label]), mode === 'message' ? '' : message]);
+    const mode = src.mode(this.fight);
+    if (mode === 'message') this.fight = false;
+    const options = src.options(mode);
+    const commands = mode === 'command' ? src.commands() : [];
+    const message = src.message(mode);
+    const key = JSON.stringify([src.online, mode, src.menuKey(), options.map(o => [o.action, o.value, o.label, o.sub, o.disabled]), commands.map(c => [c.label, c.disabled, c.sub]), mode === 'message' ? '' : message]);
     if (key !== this.uiKey) { this.uiKey = key; this.buildUi(mode, options, commands, message); }
     if (mode === 'message') this.typer?.show(message, { speed: CFG.speed || 1 });
   }
 
   clearUi() {
     this.menu?.destroy(); this.menu = null;
+    this.keyRelease?.(); this.keyRelease = null;
     this.typer?.destroy(); this.typer = null;
     this.layerUi.removeAll(true); this.layerOverlay.removeAll(true);
   }
@@ -227,19 +354,20 @@ export const defineBattleScene = () => class BattleScene extends Phaser.Scene {
   buildUi(mode, options, commands, message) {
     this.clearUi();
     const input = this.engine.input;
-    if (mode === 'message') { this.messageWindow(true, message); return; }
+    if (mode === 'message') {
+      this.messageWindow(true, message);
+      // Online: X leaves while waiting (the match goes on online); after the result, Z or X returns.
+      if (this.src.online) this.keyRelease = input.push(action => {
+        if (action === 'back' || action === 'confirm' && online()?.winner) command('socialBack');
+        return true;
+      });
+      return;
+    }
 
     if (mode === 'command') {
       this.messageWindow(false, message);
       this.menuWindow(294, 182);
-      const find = (action, value) => commands.find(c => c.action === action && (value === undefined || c.value === value));
-      const bag = find('menu', 'bag'), ball = find('menu', 'ball'), party = find('menu', 'switch'), flee = find('flee');
-      const items = [
-        { label: 'LUTAR', onSelect: () => { this.fight = true; this.uiKey = ''; this.syncUi(); } },
-        { label: 'MOCHILA', disabled: !bag || bag.disabled && !(ball && !ball.disabled), onSelect: () => command('menu', bag && !bag.disabled ? 'bag' : 'ball') },
-        { label: 'POKÉMON', disabled: !party || party.disabled, onSelect: () => command('menu', 'switch') },
-        flee ? { label: B.train ? 'SAIR' : 'FUGIR', sub: B.train ? '' : String(flee.label).split('·')[1]?.trim(), disabled: flee.disabled, onSelect: () => command('flee') } : { label: '', disabled: true },
-      ];
+      const items = [{ label: 'LUTAR', onSelect: () => { this.fight = true; this.uiKey = ''; this.syncUi(); } }, ...commands];
       this.menu = new Menu(this, { x: 302, y: BOX_Y + 11, columns: 2, cellW: 86, cellH: 27, items, input });
       this.layerUi.add(this.menu.container);
       return;
@@ -248,20 +376,20 @@ export const defineBattleScene = () => class BattleScene extends Phaser.Scene {
     if (mode === 'fight') {
       this.menuWindow(4, 318); this.menuWindow(326, 150);
       const info = this.add.container(0, 0); this.layerUi.add(info);
+      const effOf = o => {
+        const parts = o.sub.split(' · ').map(s => s.trim()), status = parts[1] === 'Status';
+        const tag = parts.find(p => effLabel[p]);
+        return { parts, status, eff: status ? '' : tag ? effLabel[tag] : this.src.effKnown() ? 'Efetivo' : '' };
+      };
       const showInfo = o => {
         info.removeAll(true);
-        const parts = o.sub.split(' · ').map(s => s.trim()), status = parts[1] === 'Status';
-        const tag = parts.find(p => effLabel[p]), eff = status ? '' : tag ? effLabel[tag] : B.double ? '' : 'Efetivo';
+        const { parts, status, eff } = effOf(o);
         info.add(pixelText(this, 336, BOX_Y + 11, 'PP', { size: TEXT.large }));
         info.add(pixelText(this, 466, BOX_Y + 11, (parts.find(p => p.startsWith('PP ')) || '').replace('PP ', ''), { size: TEXT.large }).setOrigin(1, 0));
         info.add(pixelText(this, 336, BOX_Y + 30, 'TIPO/' + (parts[0] || '').toUpperCase(), { size: TEXT.large }));
         info.add(pixelText(this, 336, BOX_Y + 50, [status ? 'Status' : parts[1], eff].filter(Boolean).join(' · '), { size: TEXT.small, color: COLORS.inkSoft }));
       };
-      const items = options.map((o, i) => {
-        const parts = o.sub.split(' · ').map(s => s.trim()), status = parts[1] === 'Status';
-        const tag = parts.find(p => effLabel[p]), eff = status ? '' : tag ? effLabel[tag] : B.double ? '' : 'Efetivo';
-        return { ...o, eff, onFocus: () => { this.moveIndex = i; showInfo(o); }, onSelect: () => { this.moveIndex = i; command(o.action, o.value); } };
-      });
+      const items = options.map((o, i) => ({ ...o, eff: effOf(o).eff, onFocus: () => { this.moveIndex = i; showInfo(o); }, onSelect: () => { this.moveIndex = i; command(o.action, o.value); } }));
       while (items.length < 4) items.push({ label: '—', disabled: true, empty: true });
       this.menu = new Menu(this, {
         x: 10, y: BOX_Y + 9, columns: 2, cellW: 154, cellH: 27, items, input, cursor: false,
@@ -279,7 +407,7 @@ export const defineBattleScene = () => class BattleScene extends Phaser.Scene {
     if (mode === 'target') {
       this.messageWindow(false, message.replace(/:$/, '.'));
       this.menuWindow(294, 182);
-      const back = engineOptions('.react-battle-choices [data-act="menu"]')[0];
+      const back = this.src.targetBack();
       this.menu = new Menu(this, {
         x: 302, y: BOX_Y + 11, columns: 2, cellW: 86, cellH: 27, input,
         items: options.map(o => ({ label: o.label, disabled: o.disabled, onSelect: () => command(o.action, o.value) })),
@@ -308,27 +436,20 @@ export const defineBattleScene = () => class BattleScene extends Phaser.Scene {
   }
 
   buildOverlay(options, message) {
-    const titles = { bag: 'Mochila', ball: 'Pokébolas', switch: 'Pokémon', itemTarget: 'Mochila', itemMove: 'Mochila' };
-    const title = B.forced ? 'Pokémon' : titles[B.menu] || '';
+    const { title, hint, back, list, tabs, partyMon } = this.src.overlay(options);
     const g = this.add.graphics(); this.layerOverlay.add(g);
     g.fillStyle(COLORS.panelFill, 1).fillRect(0, 0, WIDTH, ARENA_H).fillStyle(COLORS.panelHead, 1).fillRect(0, 0, WIDTH, 26);
     this.layerOverlay.add(pixelText(this, 10, 3, title, { size: TEXT.large, color: '#ffffff', shadow: '#285878' }));
-    const isBack = o => o.action === 'menu' && o.label.startsWith('Voltar');
-    const back = options.filter(isBack).at(-1), list = options.filter(o => !isBack(o));
-    // Wild battles reach Poké Balls from the bag, as in FireRed.
-    const ball = (window.battleCommandItems?.() || []).find(c => c.value === 'ball');
-    if (['bag', 'ball'].includes(B.menu) && ball) {
-      [['bag', 'Itens'], ['ball', 'Pokébolas']].forEach(([v, label], i) => {
-        const active = B.menu === v, x = 286 + i * 96;
-        const tg = this.add.graphics().fillStyle(0xffffff, active ? 1 : 0.25).fillRoundedRect(x, 3, 90, 20, 4);
-        const tt = pixelText(this, x + 45, 3, label, { size: TEXT.large, color: active ? '#285878' : '#ffffff' }).setOrigin(0.5, 0);
-        const zone = this.add.zone(x, 3, 90, 20).setOrigin(0).setInteractive({ useHandCursor: true }).on('pointerdown', () => command('menu', v));
-        this.layerOverlay.add([tg, tt, zone]);
-      });
-    }
+    (tabs || []).forEach(({ label, active, onSelect }, i) => {
+      const x = 286 + i * 96;
+      const tg = this.add.graphics().fillStyle(0xffffff, active ? 1 : 0.25).fillRoundedRect(x, 3, 90, 20, 4);
+      const tt = pixelText(this, x + 45, 3, label, { size: TEXT.large, color: active ? '#285878' : '#ffffff' }).setOrigin(0.5, 0);
+      const zone = this.add.zone(x, 3, 90, 20).setOrigin(0).setInteractive({ useHandCursor: true }).on('pointerdown', onSelect);
+      this.layerOverlay.add([tg, tt, zone]);
+    });
     // Party choices show each Pokémon as a card; items show their icon.
-    const partyActions = ['sw', 'inventoryTarget'], party = list.length && list.every(o => partyActions.includes(o.action) && R.team[Number(o.value)]);
-    const items = list.map(o => ({ ...o, mon: party ? R.team[Number(o.value)] : null, onSelect: () => command(o.action, o.value) }));
+    const party = list.length && list.every(o => partyMon(o));
+    const items = list.map(o => ({ ...o, mon: party ? partyMon(o) : null, onSelect: () => command(o.action, o.value) }));
     if (!items.length) items.push({ label: 'Nada disponível.', disabled: true });
     const cellH = party ? 52 : 30, rows = Math.floor((ARENA_H - 34) / cellH);
     this.menu = new Menu(this, {
@@ -337,7 +458,6 @@ export const defineBattleScene = () => class BattleScene extends Phaser.Scene {
       drawCell: (c, item, x, y, focused) => party ? this.drawPartyCell(c, item, x, y, focused) : this.drawItemCell(c, item, x, y, focused),
     });
     this.layerOverlay.add(this.menu.container);
-    const hint = { bag: 'Usar qual item?', ball: 'Usar qual Pokébola?', switch: 'Escolha um Pokémon.', itemTarget: 'Usar em qual Pokémon?', itemMove: 'Restaurar PP de qual golpe?' }[B.menu];
     this.messageWindow(true, message || hint || 'Escolha uma opção.');
   }
 
@@ -359,7 +479,7 @@ export const defineBattleScene = () => class BattleScene extends Phaser.Scene {
     this.cellFrame(c, x, y, w, h, focused, item.disabled);
     addIcon(this, c, m.sp, x + 24, y + 38, 0.5);
     const ink = item.disabled ? COLORS.disabled : COLORS.ink;
-    c.add(pixelText(this, x + 50, y + 3, nm(m), { size: TEXT.large, color: ink }));
+    c.add(pixelText(this, x + 50, y + 3, monName(m), { size: TEXT.large, color: ink }));
     c.add(pixelText(this, x + w - 8, y + 3, `Nv${m.lvl}`, { size: TEXT.large, color: ink }).setOrigin(1, 0));
     const ratio = Math.max(0, m.hp / m.maxHp), bx = x + 50, by = y + 30, bw = 110;
     c.add(this.add.graphics().fillStyle(COLORS.barBorder, 1).fillRoundedRect(bx - 1, by - 1, bw + 2, 7, 3).fillStyle(COLORS.barTrack, 1).fillRect(bx, by, bw, 5).fillStyle(hpColor(ratio), 1).fillRect(bx, by, bw * ratio, 5));

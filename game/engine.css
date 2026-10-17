@@ -32,3 +32,78 @@ body .evo{z-index:1100!important;background:#101418!important;font-family:"Jerse
 body .evo .evo-stage img{image-rendering:pixelated}
 body .evo .evo-text{width:calc(var(--u)*300);max-width:calc(100vw - 16px);padding:calc(var(--u)*7) calc(var(--u)*9);border:calc(var(--u)*1.5) solid #d8683c;border-radius:calc(var(--u)*5);background:#304860;box-shadow:inset 0 0 0 var(--u) #f0c8a0;color:#fff;font:400 calc(var(--u)*20)/1.2 "Jersey 10",monospace;text-shadow:var(--u) var(--u) 0 #50586a;text-align:left}
 body .evo .btn{background:none!important;border:0!important;box-shadow:none!important;color:#c8d0d8!important;font:400 calc(var(--u)*10)/1 "Jersey 10",monospace!important}
+
+/* Hybrid HTML screens (Social, Team Builder, leagues): the page wears the game's look. The app
+   shell's sidebar is hidden, the header becomes the game's blue title bar, panels become cream
+   windows with a purple frame, buttons become ▶ menu choices and notes use the message box. */
+html.game-skin body,html.game-skin .react-shell,html.game-skin .react-content{background:#20303c!important}
+html.game-skin .react-shell{display:block!important}
+html.game-skin .react-sidebar,html.game-skin .react-mobile-nav,html.game-skin #app>header.top,html.game-skin .game-screen-heading,html.game-skin .react-header-start small,html.game-skin .react-header-start div>span:first-child,html.game-skin .react-balance{display:none!important}
+html.game-skin :is(.react-header,.react-content){margin-left:0!important;left:0!important;width:auto!important}
+html.game-skin .react-header{position:sticky;top:0;z-index:20;display:flex!important;align-items:center!important;justify-content:space-between!important;padding-right:calc(var(--u)*34)!important;min-height:0!important;height:calc(var(--u)*30);padding-left:calc(var(--u)*8)!important;padding-top:0!important;padding-bottom:0!important;background:#58a8d8!important;border:0!important;border-bottom:calc(var(--u)*2) solid #285878!important;box-shadow:none!important;color:#fff!important}
+html.game-skin .react-header *{font-family:"Jersey 10",monospace!important}
+html.game-skin .react-header :is(h1,h2,strong){color:#fff!important;font-size:calc(var(--u)*20)!important;font-weight:400!important;text-shadow:var(--u) var(--u) 0 #285878}
+html.game-skin .react-header :is(small,span,p){color:#e8f4fb!important;font-size:calc(var(--u)*10)!important}
+html.game-skin .react-header .react-icon-button,html.game-skin .react-header .react-balance{background:#f8f8f8!important;border:var(--u) solid #285878!important;border-radius:calc(var(--u)*4)!important;color:#303030!important;box-shadow:none!important;font-size:calc(var(--u)*10)!important}
+html.game-skin .react-content{padding:calc(var(--u)*6) calc(var(--u)*6) calc(var(--u)*12)!important;max-width:none!important}
+html.game-skin .react-header-start{display:flex!important;align-items:center!important;gap:calc(var(--u)*6)!important}
+html.game-skin .react-header .react-icon-button{width:calc(var(--u)*16)!important;height:calc(var(--u)*16)!important;min-width:0!important;padding:0!important}
+html.game-skin .react-header .react-icon-button svg{width:calc(var(--u)*9)!important;height:calc(var(--u)*9)!important}
+html.game-skin #app{max-width:calc(var(--u)*468)!important;margin:0 auto!important}
+html.game-skin .game-screen-heading{margin:0 0 calc(var(--u)*4)!important;padding:0!important}
+html.game-skin .game-screen-heading h1{margin:0!important;color:#f8f8f8!important;font:400 calc(var(--u)*20)/1 "Jersey 10",monospace!important;text-shadow:var(--u) var(--u) 0 #101418}
+html.game-skin .game-screen-heading::after{display:none!important}
+html.game-skin #app :is(.panel,.card,article){background:#f8f8f8!important;border:calc(var(--u)*1.5) solid #706890!important;border-radius:calc(var(--u)*5)!important;box-shadow:inset 0 0 0 var(--u) #c8c0e0!important;color:#303030!important}
+html.game-skin #app .panel{padding:calc(var(--u)*8) calc(var(--u)*10)!important;margin-bottom:calc(var(--u)*6)!important}
+html.game-skin #app .panel :is(.card,article){padding:calc(var(--u)*5) calc(var(--u)*7)!important;box-shadow:none!important;border-width:var(--u)!important;border-color:#c8c0e0!important}
+html.game-skin #app,html.game-skin #app :is(p,li,label,small,span,td,th,summary,input,select,textarea,button,a,strong,h2,h3,h4,legend,output){font-family:"Jersey 10",monospace!important;letter-spacing:.02em}
+html.game-skin #app :is(p,li,label,td,th,summary,span,output){font-size:calc(var(--u)*10)!important;line-height:1.3!important;color:#303030}
+html.game-skin #app :is(small,.tiny,.mute){font-size:calc(var(--u)*10)!important;color:#606878!important}
+html.game-skin #app h2{font:400 calc(var(--u)*20)/1.1 "Jersey 10",monospace!important;color:#303030!important;margin:0 0 calc(var(--u)*5)!important}
+html.game-skin #app :is(h3,h4,strong){font-weight:400!important;font-size:calc(var(--u)*13)!important;color:#303030!important}
+html.game-skin #app .btn{position:relative;min-height:0!important;margin:calc(var(--u)*1) calc(var(--u)*2) calc(var(--u)*1) 0!important;padding:calc(var(--u)*3) calc(var(--u)*8) calc(var(--u)*3) calc(var(--u)*14)!important;border:var(--u) solid #c8c0e0!important;border-radius:calc(var(--u)*3)!important;background:#f8f8f8!important;box-shadow:none!important;color:#303030!important;font:400 calc(var(--u)*13)/1.1 "Jersey 10",monospace!important;text-align:left;transform:none!important}
+html.game-skin #app .btn:is(:hover,:focus-visible):not(:disabled){background:#e8e0f8!important;border-color:#706890!important;outline:none}
+html.game-skin #app .btn:is(:hover,:focus-visible):not(:disabled)::before{content:'▶';position:absolute;left:calc(var(--u)*4);top:50%;transform:translateY(-50%);font-size:calc(var(--u)*8)}
+html.game-skin #app .btn:is(.gold,[aria-pressed="true"]){background:#d8e8f8!important;border-color:#285878!important;color:#285878!important}
+html.game-skin #app .btn:disabled{color:#a8a8b0!important;background:#f0f0f0!important;border-color:#d8d8e0!important}
+html.game-skin #app :is(input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea){min-height:0!important;padding:calc(var(--u)*3) calc(var(--u)*6)!important;border:var(--u) solid #706890!important;border-radius:calc(var(--u)*3)!important;background:#fff!important;box-shadow:inset 0 var(--u) 0 #c8c0e0!important;color:#303030!important;font-size:calc(var(--u)*13)!important;caret-color:#d8683c}
+html.game-skin #app :is(input,select,textarea):focus{outline:var(--u) solid #d8683c!important}
+html.game-skin #app details{border-color:#c8c0e0!important}
+html.game-skin #app summary{cursor:pointer;color:#285878!important}
+html.game-skin #app summary::marker{content:'▶ '}
+html.game-skin #app details[open]>summary::marker{content:'▼ '}
+html.game-skin #app .note{padding:calc(var(--u)*5) calc(var(--u)*8)!important;border:calc(var(--u)*1.5) solid #d8683c!important;border-radius:calc(var(--u)*4)!important;background:#304860!important;box-shadow:inset 0 0 0 var(--u) #f0c8a0!important;color:#fff!important;font:400 calc(var(--u)*13)/1.25 "Jersey 10",monospace!important;text-shadow:var(--u) var(--u) 0 #50586a}
+html.game-skin #app img{image-rendering:pixelated}
+html.game-skin #app hr{border-color:#c8c0e0!important}
+html.game-skin #app .tp{font-family:"Jersey 10",monospace!important;font-size:calc(var(--u)*10)!important;border-radius:calc(var(--u)*2)!important}
+html.game-skin #app :is(a){color:#285878!important}
+html.game-skin #app .builder-editor{background:#f0f0f8!important;border:var(--u) solid #c8c0e0!important;border-radius:calc(var(--u)*4)!important}
+html.game-skin #app .builder-editor>div{background:#f8f8f8!important;border-radius:calc(var(--u)*4)!important}
+
+/* Profile window (opens over any screen while the engine runs). */
+html.game-skin-windows .profile-panel{border:calc(var(--u)*1.5) solid #706890!important;border-radius:calc(var(--u)*5)!important;background:#f8f8f8!important;box-shadow:inset 0 0 0 var(--u) #c8c0e0,0 calc(var(--u)*5) calc(var(--u)*15) #0008!important;color:#303030!important}
+html.game-skin-windows .profile-panel :is(h2,h3,strong,span,p,label,input,select,option,button,small,summary,li){font-family:"Jersey 10",monospace!important;font-weight:400!important;letter-spacing:.02em}
+html.game-skin-windows .profile-panel h2{font-size:calc(var(--u)*20)!important;color:#303030!important}
+html.game-skin-windows .profile-panel :is(h3,strong){font-size:calc(var(--u)*13)!important;color:#303030!important}
+html.game-skin-windows .profile-panel :is(p,label,span,small,li,summary){font-size:calc(var(--u)*10)!important;color:#505868!important}
+html.game-skin-windows .profile-panel .profile-identity{background:#e8e0f8!important;border:var(--u) solid #c8c0e0!important;border-radius:calc(var(--u)*4)!important}
+html.game-skin-windows .profile-panel .profile-avatars{background:#f0f0f8!important;border-radius:calc(var(--u)*4)!important}
+html.game-skin-windows .profile-panel .profile-avatars button{background:#f8f8f8!important;border:var(--u) solid #c8c0e0!important;border-radius:calc(var(--u)*3)!important;box-shadow:none!important}
+html.game-skin-windows .profile-panel .profile-avatars button:is([aria-pressed="true"],.selected,:hover,:focus-visible){background:#e8e0f8!important;border-color:#d8683c!important}
+html.game-skin-windows .profile-panel img{image-rendering:pixelated}
+html.game-skin-windows .profile-panel :is(input,select){border:var(--u) solid #706890!important;border-radius:calc(var(--u)*3)!important;background:#fff!important;color:#303030!important;font-size:calc(var(--u)*13)!important;box-shadow:inset 0 var(--u) 0 #c8c0e0!important}
+html.game-skin-windows .profile-panel .btn{position:relative;padding:calc(var(--u)*3) calc(var(--u)*8) calc(var(--u)*3) calc(var(--u)*14)!important;border:var(--u) solid #c8c0e0!important;border-radius:calc(var(--u)*3)!important;background:#f8f8f8!important;box-shadow:none!important;color:#303030!important;font-size:calc(var(--u)*13)!important;outline:none!important}
+html.game-skin-windows .profile-panel .btn:is(.gold,[type=submit]){background:#d8e8f8!important;border-color:#285878!important;color:#285878!important}
+html.game-skin-windows .profile-panel .btn:is(:hover,:focus-visible):not(:disabled){background:#e8e0f8!important;border-color:#706890!important}
+html.game-skin-windows .profile-panel .btn:is(:hover,:focus-visible):not(:disabled)::before{content:'▶';position:absolute;left:calc(var(--u)*4);top:50%;transform:translateY(-50%);font-size:calc(var(--u)*8)}
+/* The profile opens beside the game: the current screen stays behind it, dimmed. */
+body.game-stage-active .desktop-account .profile-panel{visibility:visible!important}
+body.game-stage-active:has(.profile-panel) #game-stage{filter:brightness(.55)}
+
+/* Mouse cursor in the game's pixel style: an arrow, a pointing hand over anything clickable
+   (including Phaser menus, which set "pointer" on the canvas), the normal text cursor in fields. */
+html.game-skin-windows,html.game-skin-windows *{cursor:url(assets/ui/cursor-arrow.png) 2 2,default!important}
+html.game-skin-windows :is(button,a[href],summary,select,label,[data-act],[data-nav],[role=button],[role=tab],input[type=checkbox],input[type=radio],input[type=range]):not(:disabled,[aria-disabled=true]),
+html.game-skin-windows :is(button,a[href],summary,[data-act],[data-nav],[role=button],[role=tab]):not(:disabled,[aria-disabled=true]) *,
+html.game-skin-windows #game-stage canvas[style*="cursor: pointer"]{cursor:url(assets/ui/cursor-hand.png) 11 1,pointer!important}
+html.game-skin-windows :is(input:not([type=checkbox],[type=radio],[type=range],[type=button],[type=submit]),textarea,[contenteditable=true]){cursor:text!important}

@@ -139,7 +139,17 @@
       this.blur=()=>{this.target=null;this.input.keyboard.resetKeys();if(this.player?.body)this.player.setVelocity(0);this.savePosition();};
       window.addEventListener('blur',this.blur);document.addEventListener('visibilitychange',this.blur);
       this.events.once('shutdown',()=>{this.savePosition();window.removeEventListener('blur',this.blur);document.removeEventListener('visibilitychange',this.blur);});
+      if(this.options.hosted)this.hostedSetup();
       this.options.onReady();
+    }
+    // Inside the main game: the camera follows the trainer over the 640x416 map, text is drawn at the
+    // game's render scale, and Z/Enter/Space interact while X/Backspace open the menu (like E and Esc).
+    hostedSetup(){
+      this.cameras.main.setBounds(0,0,C.WIDTH,C.HEIGHT).startFollow(this.player,true,.2,.2);
+      const scale=this.game.registry.get('renderScale')||1;this.children.list.filter(o=>o.type==='Text').forEach(t=>t.setResolution(scale));
+      const once=(name,fn)=>this.input.keyboard.on(name,event=>{if(this.handledKeys.has(event)||event.repeat)return;this.handledKeys.add(event);fn();});
+      for(const k of ['Z','ENTER','SPACE'])once('keydown-'+k,()=>{if(!this.blocked())this.nearest();});
+      for(const k of ['X','BACKSPACE'])once('keydown-'+k,()=>{if(!this.blocked())this.options.onEscape();});
     }
     blocked(){return this.options.isBlocked()||document.hidden||document.activeElement?.matches('input,select,textarea,button')&&document.activeElement.closest('.profile-panel');}
     animate(sprite,dir,moving){
@@ -188,14 +198,17 @@
     }
     emote(index){
       const m=this.monsters.getChildren().find(x=>x.getData('member').index===index);if(!m)return;
-      const heart=this.add.text(m.x,m.y-40,'♥',{fontFamily:'monospace',fontSize:'16px',color:'#efbc96',stroke:'#6a4d3d',strokeThickness:2}).setOrigin(.5).setDepth(1000);
+      const heart=this.add.text(m.x,m.y-40,'♥',{fontFamily:'monospace',fontSize:'16px',color:'#efbc96',stroke:'#6a4d3d',strokeThickness:2,resolution:this.game.registry.get('renderScale')||1}).setOrigin(.5).setDepth(1000);
       this.tweens.add({targets:heart,y:heart.y-18,alpha:0,duration:1200,onComplete:()=>heart.destroy()});
     }
   }
   let instance=null,scene=null;
   window.CampWorld={
-    start(options){this.destroy();scene=new CampScene();scene.options=options;instance=new Phaser.Game({type:Phaser.CANVAS,parent:options.parent||'camp-canvas',width:C.WIDTH,height:C.HEIGHT,pixelArt:true,roundPixels:true,backgroundColor:'#729653',scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},physics:{default:'arcade',arcade:{gravity:{y:0},debug:false}},audio:{noAudio:true},loader:{imageLoadType:'HTMLImageElement',crossOrigin:null},scene});},
-    destroy(){if(instance){scene.savePosition();instance.destroy(true);instance=null;scene=null;}},
+    start(options){this.destroy();scene=new CampScene();scene.options=options;
+      // With the game engine running, the world is a scene of the main game (no second canvas).
+      if(window.GameEngine?.enabled){options.hosted=true;instance='engine';GameEngine.hostWorld(scene);return;}
+      instance=new Phaser.Game({type:Phaser.CANVAS,parent:options.parent||'camp-canvas',width:C.WIDTH,height:C.HEIGHT,pixelArt:true,roundPixels:true,backgroundColor:'#729653',scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},physics:{default:'arcade',arcade:{gravity:{y:0},debug:false}},audio:{noAudio:true},loader:{imageLoadType:'HTMLImageElement',crossOrigin:null},scene});},
+    destroy(){if(instance){scene.savePosition();if(instance==='engine')GameEngine.removeWorld(scene);else instance.destroy(true);instance=null;scene=null;}},
     emote(index){scene?.emote(index);},
     position(){return scene?.player?{x:scene.player.x,y:scene.player.y,dir:scene.direction}:null;},
     debug(){return {game:instance,scene};}

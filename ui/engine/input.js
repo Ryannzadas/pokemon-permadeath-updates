@@ -14,6 +14,8 @@ export class InputManager {
   constructor() {
     this.stack = [];
     this.enabled = false;
+    // While walking in a world scene, keys go to that scene (Phaser keyboard) instead of the menus.
+    this.passthrough = false;
     this.padHeld = new Set();
     addEventListener('keydown', event => this.onKey(event), true);
   }
@@ -28,7 +30,7 @@ export class InputManager {
   }
 
   onKey(event) {
-    if (!this.enabled || event.ctrlKey || event.altKey || event.metaKey) return;
+    if (!this.enabled || this.passthrough || event.ctrlKey || event.altKey || event.metaKey) return;
     if (event.target.closest?.('input,textarea,select,[contenteditable="true"]')) return;
     const action = KEYS[event.code];
     if (!action) return;
