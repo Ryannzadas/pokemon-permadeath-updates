@@ -2,3 +2,6 @@ node_modules/
 server/node_modules/
 dist/
 *.log
+
+# Configuração do Firebase do app (fica só na máquina de build e dentro do instalador)
+firebase-config.json

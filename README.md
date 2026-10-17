@@ -107,6 +107,8 @@ Atualizações não são instaladas ao fechar automaticamente. A instalação ex
 
 ## Desenvolvimento e testes
 
+O arquivo `firebase-config.json` (configuração web do Firebase: apiKey, authDomain, projectId e appId) não fica no repositório. Copie-o para a raiz do projeto antes de `npm start` ou `npm run dist:win`; o instalador continua levando esse arquivo.
+
 Requer Node.js/npm. Execute `npm ci`, `npm test`, `npm start` ou `npm run dist:win`. O build fica em `dist/`. `npm run verify:package` compara os arquivos empacotados com a fonte e verifica a versão do `package.json` (inclusive as de teste), cabeçalhos Windows do executável e do instalador e, quando há `latest.yml`, o SHA-512 da atualização.
 
 Comandos de teste:
