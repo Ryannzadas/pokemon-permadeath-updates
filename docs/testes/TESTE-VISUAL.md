@@ -36,7 +36,7 @@ As 14 apresentações de treinadores foram verificadas em 1280, 720 e 390 pixels
 
 O catálogo online contém 1.025 espécies, 919 golpes nesta junção de dados e 284 habilidades. **O motor implementa 17 dessas habilidades; 267 continuam pendentes.** A varredura de metadados apontou 322 golpes com efeitos adaptados ou que exigem revisão específica. Os outros golpes também não foram certificados como equivalentes em todos os detalhes aos jogos oficiais.
 
-`REVISAO-EFEITOS.csv` e `REVISAO-EFEITOS.json`, no código-fonte, registram a auditoria. Dados completos no Team Builder não significam efeitos completos na batalha. A implementação integral dos efeitos é uma etapa de desenvolvimento do motor, separada desta revisão.
+`docs/revisao/REVISAO-EFEITOS.csv` e `docs/revisao/REVISAO-EFEITOS.json`, no código-fonte, registram a auditoria. Dados completos no Team Builder não significam efeitos completos na batalha. A implementação integral dos efeitos é uma etapa de desenvolvimento do motor, separada desta revisão.
 
 ## Servidor para testar as correções de combate online
 

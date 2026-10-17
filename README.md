@@ -4,7 +4,7 @@ Cursor preservado nos formulários; envio de alterações feitas durante a sincr
 
 # Multiplayer gratuito no Render — edição 0.4.0
 
-Servidor adaptado ao Render Free, com autenticação e persistência no Firebase Spark. Veja `ATIVAR-MULTIPLAYER.md`. O aplicativo tem o campo Amigos e ligas → Conexão multiplayer para salvar o endereço HTTPS do Render. As credenciais Admin ficam exclusivamente no Secret File do servidor.
+Servidor adaptado ao Render Free, com autenticação e persistência no Firebase Spark. Veja `docs/ATIVAR-MULTIPLAYER.md`. O aplicativo tem o campo Amigos e ligas → Conexão multiplayer para salvar o endereço HTTPS do Render. As credenciais Admin ficam exclusivamente no Secret File do servidor.
 
 Os modelos e o adaptador HTTP foram testados localmente; a publicação real depende da sua configuração no Render. Esta edição substitui a instrução de ativação via Cloud Functions da entrega anterior.
 
@@ -12,8 +12,8 @@ Os modelos e o adaptador HTTP foram testados localmente; a publicação real dep
 
 Esta é uma versão de teste, sem publicação automática. Execute `npm ci` e `npm start` para abrir o aplicativo; `npm test` valida os modelos e o servidor. Os testes de interface usam Playwright e `BROWSER_PATH` quando necessário.
 
-- Alterações: [RELEASE-NOTES-0.4.0.md](RELEASE-NOTES-0.4.0.md).
-- Ativação do serviço online: [ATIVAR-MULTIPLAYER.md](ATIVAR-MULTIPLAYER.md).
+- Alterações: [docs/versoes/RELEASE-NOTES-0.4.0.md](docs/versoes/RELEASE-NOTES-0.4.0.md).
+- Ativação do serviço online: [docs/ATIVAR-MULTIPLAYER.md](docs/ATIVAR-MULTIPLAYER.md).
 - O backend em `server` usa o mesmo motor de batalha da build, preparado por `scripts/prepare-server.cjs`. Credenciais de administração não fazem parte do aplicativo.
 - `npm run dist:win` gera o instalador e os metadados, com publicação desativada.
 
@@ -53,7 +53,7 @@ Aplicativo Electron para Windows x64 com dois modos de jornada, mapas 2D em Phas
 
 Execute `Pokemon-Permadeath-Setup-0.3.4.exe`. O mesmo aplicativo, diretório de dados e sessão de conta são preservados. O instalador não apaga os saves. A fonte ZIP é destinada ao desenvolvimento, não precisa ser extraída para jogar.
 
-O repositório de atualizações é https://github.com/Ryannzadas/pokemon-permadeath-updates. A compilação usa `--publish never`: nenhuma Release é publicada automaticamente. Para publicar a versão, anexe o EXE, o `.exe.blockmap` correspondente e `latest.yml` na mesma Release; cole `RELEASE-NOTES-0.3.4.md` na descrição.
+O repositório de atualizações é https://github.com/Ryannzadas/pokemon-permadeath-updates. A compilação usa `--publish never`: nenhuma Release é publicada automaticamente. Para publicar a versão, anexe o EXE, o `.exe.blockmap` correspondente e `latest.yml` na mesma Release; cole as notas da versão (`docs/versoes/`) na descrição.
 
 `latest.yml` contém versão, nome, tamanho e hash do instalador; não contém chaves privadas ou tokens GitHub. A configuração Firebase de cliente identifica o projeto; a proteção dos dados depende das regras de acesso do Firebase. Não inclua credenciais administrativas nem tokens de publicação no aplicativo.
 
@@ -107,7 +107,19 @@ Atualizações não são instaladas ao fechar automaticamente. A instalação ex
 
 ## Desenvolvimento e testes
 
-Requer Node.js/npm. Execute `npm ci`, `npm test`, `npm start` ou `npm run dist:win`. O build fica em `dist/`. `node scripts/verify-package.cjs dist` compara os arquivos empacotados com a fonte e verifica versão, cabeçalhos Windows e SHA-512 do instalador.
+Requer Node.js/npm. Execute `npm ci`, `npm test`, `npm start` ou `npm run dist:win`. O build fica em `dist/`. `npm run verify:package` compara os arquivos empacotados com a fonte e verifica a versão do `package.json` (inclusive as de teste), cabeçalhos Windows do executável e do instalador e, quando há `latest.yml`, o SHA-512 da atualização.
+
+Comandos de teste:
+
+| Comando | O que cobre |
+| --- | --- |
+| `npm test` | Modelos, batalhas, saves por modo, diário, autenticação, servidor e regras do atualizador |
+| `npm run test:ui` | Telas HTML com o motor desligado: jornada, loja, exploração, acampamento, Social, formulários |
+| `npm run test:engine` | Cenas do motor de jogo pelo teclado: batalha, menus, jornada, mundos de caminhada e batalha online |
+| `npm run test:interface` | Interface React, telas, duplas, inicialização, navegação e telas pequenas |
+| `npm run test:approved` / `test:visual` | Telas aprovadas e layout visual |
+| `npm run test:online` | Social com dois jogadores, Pokédex nacional no Team Builder e administração de ligas |
+| `npm run test:full` | Todos os anteriores, em sequência |
 
 `npm test` executa modelos, batalhas, saves por modo, diário, autenticação e regras do atualizador. `npm run test:ui` exige Playwright no caminho `CODEX_PRIMARY_RUNTIME_NODE_MODULES` e Chromium em `BROWSER_PATH`; opcionalmente use `BROWSER_SINGLE_PROCESS=1` em ambientes limitados. Os testes servem o jogo localmente e usam dados temporários. Verificam navegação, nomes, modo, treino, inventários, compra/ensino, cura por proximidade, notificações, colisões, falhas de gravação, continuidade do Phaser e layouts em 1280, 720 e 360 px.
 
