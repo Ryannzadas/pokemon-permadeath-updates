@@ -1,6 +1,6 @@
 # Pokémon Permadeath — teste das telas aprovadas
 
-Versão **0.4.1-test.18**.
+Versão **0.5.0** (lançamento; notas em `docs/versoes/RELEASE-NOTES-0.5.0.md`). Abaixo, o histórico das versões de teste.
 
 ## Novidades da test.18
 

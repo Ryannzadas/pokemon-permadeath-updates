@@ -8,7 +8,7 @@ const {socialRequest,validateServerURL}=require('./social.cjs');
 const {openGoogleLogin}=require('./login.cjs');
 const {createUpdateController}=require('./updates.cjs');
 // Preserve the portable application's account and save directory.
-app.setPath('userData',path.join(app.getPath('appData'),'pokemon-permadeath-visual-test'));
+app.setPath('userData',path.join(app.getPath('appData'),'pokemon-permadeath-desktop'));
 let updates;
 protocol.registerSchemesAsPrivileged([{scheme:'game',privileges:{standard:true,secure:true,supportFetchAPI:true,stream:true}}]);
 const single=app.requestSingleInstanceLock();
@@ -130,7 +130,7 @@ async function importSlots(slots){
   store.replace(cleanSlots(slots),store.data.cloudVersion,true);scheduleSync();win.reload();
 }
 function createWindow(){
-  win=new BrowserWindow({show:false,width:1080,height:850,minWidth:420,minHeight:600,backgroundColor:'#f5f2e9',title:'Pokemon Permadeath — Teste Visual',icon:path.join(app.getAppPath(),'game/assets/app-icon.png'),webPreferences:{preload:path.join(__dirname,'preload.cjs'),nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true}});
+  win=new BrowserWindow({show:false,width:1080,height:850,minWidth:420,minHeight:600,backgroundColor:'#101418',title:'Pokemon Permadeath',icon:path.join(app.getAppPath(),'game/assets/app-icon.png'),webPreferences:{preload:path.join(__dirname,'preload.cjs'),nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true}});
   win.webContents.setWindowOpenHandler(()=>({action:'deny'}));
   win.webContents.on('will-navigate',event=>event.preventDefault());
   win.webContents.on('will-attach-webview',event=>event.preventDefault());
@@ -164,7 +164,7 @@ app.whenReady().then(async()=>{
   register('social:configure',async value=>{const next=validateServerURL(value);atomicWrite(path.join(home(),'multiplayer-config.json'),JSON.stringify({url:next}));serverURL=next;return {url:serverURL};});
   register('social:request',async(op,arg)=>{if(!user||!configured())throw new Error('Entre na sua conta para jogar online.');return socialRequest(config,await token(),op,arg,serverURL);});
   register('account:configure',async()=>{await requireTitle();if(user)throw new Error('Saia da conta antes de mudar o Firebase.');const result=await dialog.showOpenDialog(win,{properties:['openFile'],filters:[{name:'Configuração Firebase',extensions:['json']}]});if(!result.canceled){const c=validateConfig(JSON.parse(fs.readFileSync(result.filePaths[0],'utf8')));atomicWrite(path.join(home(),'firebase-config.json'),JSON.stringify(c));config=c;cloud=new FirebaseCloud(c);message='Firebase configurado. Você já pode entrar com Google.';notify();}return status();});
-  updates=createUpdateController({updater:require('electron-updater').autoUpdater,onChange:notify,currentVersion:app.getVersion(),enabled:false});
+  updates=createUpdateController({updater:require('electron-updater').autoUpdater,onChange:notify,currentVersion:app.getVersion(),enabled:app.isPackaged&&process.platform==='win32'});
   // Full screen for the game window (F11 or the game options); returns the resulting state.
   register('window:fullscreen',flag=>{if(typeof flag==='boolean'&&win)win.setFullScreen(flag);return !!win?.isFullScreen();});
   register('update:check',()=>{updates.check();return status();});

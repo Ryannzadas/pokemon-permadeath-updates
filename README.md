@@ -12,7 +12,7 @@ Os modelos e o adaptador HTTP foram testados localmente; a publicação real dep
 
 Esta é uma versão de teste, sem publicação automática. Execute `npm ci` e `npm start` para abrir o aplicativo; `npm test` valida os modelos e o servidor. Os testes de interface usam Playwright e `BROWSER_PATH` quando necessário.
 
-- Alterações: [docs/versoes/RELEASE-NOTES-0.4.0.md](docs/versoes/RELEASE-NOTES-0.4.0.md).
+- Alterações: [docs/versoes/RELEASE-NOTES-0.5.0.md](docs/versoes/RELEASE-NOTES-0.5.0.md).
 - Ativação do serviço online: [docs/ATIVAR-MULTIPLAYER.md](docs/ATIVAR-MULTIPLAYER.md).
 - O backend em `server` usa o mesmo motor de batalha da build, preparado por `scripts/prepare-server.cjs`. Credenciais de administração não fazem parte do aplicativo.
 - `npm run dist:win` gera o instalador e os metadados, com publicação desativada.
