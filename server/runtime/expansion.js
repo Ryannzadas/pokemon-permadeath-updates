@@ -54,6 +54,8 @@
   const trainerNext=()=>{const t=TRAINERS[stageIndex()]||null;if(!t||!R?.endless)return t;const pool=Object.keys(SP).filter(id=>!t.type||SP[id].t.includes(t.type));return {...t,team:t.team.map(()=>pick(pool))};};
   nextIsBoss=()=>!!trainerNext()&&(R.battle+1)%5===0;
   nextBoss=()=>{const t=trainerNext()||TRAINERS.at(-1);return {id:t.team.at(-1),title:t.name,...t};};
+  // A newly learned move goes straight into a free move slot; with four moves it waits in the learned list.
+  function autoEquip(m,id){if(!M[id]||m.moves.includes(id)||m.moves.length>=4)return false;m.moves.push(id);if(m.pp[id]===undefined)m.pp[id]=M[id].pp;return true;}
   function learnAll(m){return (SP[m.sp].learn||[]).filter(x=>x.method==='level'&&x.level<=m.lvl).map(x=>x.id);}
   function normalizeMon(m){
     if(!m||!SP[m.sp])return;
@@ -111,7 +113,7 @@
     const before=new Set(m.learned||[]),previousLevel=m.lvl;m.lvl=Math.min(100,m.lvl+n);m.friendship=Math.min(255,(m.friendship||70)+3*n);recalc(m);
     if(m.lvl>previousLevel&&sylveonEligible(m))m.sylveonLevelReady=true;
     notes.push(`${monName(m)} subiu para o nível ${m.lvl}.`);
-    (m.learned||[]).filter(id=>!before.has(id)).forEach(id=>notes.push(`${monName(m)} aprendeu ${moveName(id)}. Disponível no sumário.`));
+    (m.learned||[]).filter(id=>!before.has(id)).forEach(id=>notes.push(autoEquip(m,id)?`${monName(m)} aprendeu ${moveName(id)}!`:`${monName(m)} aprendeu ${moveName(id)}. Disponível no sumário.`));
     if(canEvolve(m))notes.push(`${monName(m)} pode evoluir!`);
   };
   xpGain=(m,e,boss)=>Math.max(1,Math.round((20+4*e.lvl)*Math.pow((2*e.lvl+10)/(e.lvl+m.lvl+10),2.5)*(boss?1.25:1)));
@@ -151,9 +153,9 @@
   evolveMon=async(m,k=0)=>{
     if(S.screen==='battle'||EVOLVING||!m)return;
     const to=evoReady(m)[k]?.[1];if(!to)return;
-    const rule=evolutions(m).find(o=>o.to===to),item=evolutionItem(rule),before=m.sp;
+    const rule=evolutions(m).find(o=>o.to===to),item=evolutionItem(rule),before=m.sp,known=new Set(m.learned||[]);
     await originalEvolve(m,k);
-    if(m.sp!==before){delete m.sylveonLevelReady;if(item)R.bag[item]--;persist();}
+    if(m.sp!==before){(m.learned||[]).filter(id=>!known.has(id)).forEach(id=>autoEquip(m,id));delete m.sylveonLevelReady;if(item)R.bag[item]--;persist();}
   };
   genShop=()=>[
     ...['potion','super',...(R?.mode==='classic'?['revive']:[]),'ball','great','ether','elixir','friendship','candy',...stoneIds,...Object.keys(strategy?.items||{})].map(id=>({kind:'item',id,price:ITEMS[id].price,once:false})),
@@ -429,7 +431,7 @@
   };
   ACT.teach=id=>{
     if(S.screen!=='summary')return;const m=summaryMon();if(!m||m.hp<=0||!R.bag['tm:'+id]||m.learned.includes(id)||!SP[m.sp].learn.some(x=>x.method==='machine'&&x.id===id))return;
-    R.bag['tm:'+id]--;m.learned.push(id);m.pp[id]=M[id].pp;persist();S.msg=`TM/HM de ${moveName(id)} ensinada. Equipe na lista de aprendidos.`;
+    R.bag['tm:'+id]--;m.learned.push(id);m.pp[id]=M[id].pp;const equipped=autoEquip(m,id);persist();S.msg=equipped?`${monName(m)} aprendeu ${moveName(id)}!`:`TM/HM de ${moveName(id)} ensinada. Equipe na lista de aprendidos.`;
   };
   ACT.moveLanguage=()=>{CFG.moveLanguage=CFG.moveLanguage==='en'?'pt':'en';saveCfg();};
   function summaryMon(){return (S.summaryBox==='pc'?R.pc:R.team)[S.summary];}
